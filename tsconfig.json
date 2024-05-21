@@ -1,0 +1,11 @@
+{
+  "compilerOptions": {
+    "jsx": "react",
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "baseUrl": "./src",
+    "resolveJsonModule": true
+  },
+  "include": ["src", "assets"],
+  "extends": "@tsconfig/react-native/tsconfig.json"
+}

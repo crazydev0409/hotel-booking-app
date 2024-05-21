@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "844282749571",
+    "project_id": "hotel-booking-app-cadb8",
+    "storage_bucket": "hotel-booking-app-cadb8.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:844282749571:android:17acc06c059d4809a931b6",
+        "android_client_info": {
+          "package_name": "com.hotelbookingapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBf4Kt2MTD1qEZhRLhfW7GWB-xCA_WHEZI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
