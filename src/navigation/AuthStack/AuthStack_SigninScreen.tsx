@@ -1,31 +1,51 @@
-import React, {useState} from 'react';
-import {View, Text, TextInput, Button, Pressable} from 'react-native';
+import React, {useEffect, useState} from 'react';
+import {NativeStackScreenProps} from '@react-navigation/native-stack';
+import {View, Text, TextInput, Button, Pressable, Image} from 'react-native';
 import tw from '../../../tailwindcss';
 import LinearGradient from 'react-native-linear-gradient';
 import auth, {firebase} from '@react-native-firebase/auth';
+import {SvgUri} from 'react-native-svg';
+import countries from '../../lib/countryCode';
+import {AuthStackParamList} from '.';
+type Props = NativeStackScreenProps<
+  AuthStackParamList,
+  'AuthStack_SigninScreen'
+>;
+const flag = require('../../../assets/images/countries/mexico.png');
 const regexp = /^\+[0-9]?()[0-9](\s|\S)(\d[0-9]{8,16})$/;
 
-const AuthStack_SigninScreen = ({navigation}) => {
+const AuthStack_SigninScreen: React.FC<Props> = ({navigation, route}) => {
   const [phone, setPhone] = useState('');
-  const [confirm, setConfirm] = useState(null);
+  const [countryCode, setCountryCode] = useState(countries[0].code);
+  const countryNumber = countries.find(
+    country => country.code === countryCode,
+  ).dial_code;
   const onPressSignIn = () => {
-    if (!regexp.test(phone)) {
+    const phoneNumber = `${countryNumber}${phone}`;
+    if (!regexp.test(phoneNumber)) {
       alert('Please Enter Phone Number');
       return;
     }
     auth()
-      .signInWithPhoneNumber(phone)
+      .signInWithPhoneNumber(phoneNumber)
       .then(confirmResult => {
-        setConfirm(confirmResult);
-        // navigation.navigate('AuthStack_OTPScreen', {
-        //   confirmResult,
-        //   phone,
-        // });
+        navigation.navigate('AuthStack_OTPScreen', {
+          confirmResult,
+          phoneNumber,
+          countryCode,
+        });
       })
       .catch(error => {
         alert(error.message);
       });
-    // navigation.navigate('AuthStack_ProfileScreen');
+  };
+  useEffect(() => {
+    if (route.params?.countryCode) {
+      setCountryCode(route.params.countryCode);
+    }
+  }, [route.params?.countryCode]);
+  const onPressCountry = () => {
+    navigation.navigate('AuthStack_CountryScreen');
   };
   return (
     <LinearGradient
@@ -37,12 +57,27 @@ const AuthStack_SigninScreen = ({navigation}) => {
         style={tw`mt-50 mb-10 self-stretch text-center text-[32px] font-normal text-black font-medium font-abril`}>
         Welcome
       </Text>
-      <TextInput
-        style={tw`bg-white rounded-lg w-3/4 self-center mt-10 text-center font-dm font-bold text-[18px]`}
-        value={phone}
-        placeholder="Phone Number?"
-        onChangeText={setPhone}
-      />
+      <View style={tw`flex-row w-full justify-center`}>
+        <View
+          style={tw`flex-row items-center h-15 w-3/4 bg-white rounded-lg mt-10`}>
+          <Pressable onPress={onPressCountry}>
+            <SvgUri
+              width={60}
+              height={30}
+              uri={`http://10.0.2.2:8081/assets/svg/${countryCode}.svg`}
+            />
+          </Pressable>
+          <Text style={tw`text-black text-[18px] font-dm font-bold`}>
+            {countryNumber}
+          </Text>
+          <TextInput
+            style={tw`bg-white rounded-lg flex-1 font-dm font-bold text-[18px]`}
+            value={phone}
+            placeholder="Phone Number?"
+            onChangeText={setPhone}
+          />
+        </View>
+      </View>
       <Text style={tw`text-center mt-3 text-black text-xs font-bold`}>
         We Need Phone Number For Your Profile
       </Text>

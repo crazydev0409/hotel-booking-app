@@ -1,14 +1,30 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {View, Text, TextInput, Button, Pressable, Image} from 'react-native';
+import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import tw from '../../../tailwindcss';
 import LinearGradient from 'react-native-linear-gradient';
-const Cancel = require('../../../assets/images/cancel.png');
-const Cross = require('../../../assets/images/across.png');
-const AuthStack_ProfileScreen = ({navigation}) => {
+import {Cancel, Cross} from '../../lib/images';
+import {AuthStackParamList} from '.';
+import countries from '../../lib/countryCode';
+import {SvgUri} from 'react-native-svg';
+type Props = NativeStackScreenProps<
+  AuthStackParamList,
+  'AuthStack_ProfileScreen'
+>;
+
+const AuthStack_ProfileScreen: React.FC<Props> = ({navigation, route}) => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
+  const [countryCode, setCountryCode] = useState(countries[0].code);
+  // useEffect(() => {
+  //   if (route.params) {
+  //     setPhone(route.params.phoneNumber);
+  //     setCountryCode(route.params.countryCode);
+  //   }
+  // }, [route.params]);
+  console.log({countryCode});
   return (
     <LinearGradient
       colors={['#FFF', '#1BF2DD']}
@@ -38,13 +54,23 @@ const AuthStack_ProfileScreen = ({navigation}) => {
           placeholder="Email"
           placeholderTextColor={'#000'}
         />
-        <TextInput
-          style={tw`bg-white rounded-[13px] w-full h-17.5 self-center mb-7 text-center font-dm font-normal text-[14px] font-bold tracking-[0.5px]`}
-          value={phone}
-          onChangeText={setPhone}
-          placeholder="Phone Number"
-          placeholderTextColor={'#000'}
-        />
+        <View style={tw`flex-row w-full justify-center mb-7`}>
+          <View
+            style={tw`flex-row items-center h-17.5 w-full bg-white rounded-[13px]`}>
+            <SvgUri
+              width={150}
+              height={30}
+              uri={`http://10.0.2.2:8081/assets/svg/${countryCode}.svg`}
+            />
+            <TextInput
+              style={tw`bg-white rounded-lg flex-1 font-dm font-bold text-[14px] `}
+              value={phone}
+              placeholder="Phone Number?"
+              placeholderTextColor={'#000'}
+              onChangeText={setPhone}
+            />
+          </View>
+        </View>
         <TextInput
           style={tw`bg-white rounded-[13px] w-full h-17.5 self-center mb-7 text-center font-dm font-normal text-[14px] font-bold tracking-[0.5px]`}
           textContentType="password"
