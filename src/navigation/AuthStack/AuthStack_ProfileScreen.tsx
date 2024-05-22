@@ -1,5 +1,14 @@
 import React, {useEffect, useState} from 'react';
-import {View, Text, TextInput, Button, Pressable, Image} from 'react-native';
+import {
+  View,
+  Text,
+  TextInput,
+  Button,
+  Pressable,
+  Image,
+  Linking,
+  TouchableOpacity,
+} from 'react-native';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import tw from '../../../tailwindcss';
 import LinearGradient from 'react-native-linear-gradient';
@@ -7,12 +16,17 @@ import {Cancel, Cross} from '../../lib/images';
 import {AuthStackParamList} from '.';
 import countries from '../../lib/countryCode';
 import {SvgUri} from 'react-native-svg';
+import {http} from '../../helpers/http';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import {useAtom} from 'jotai';
+import {isLoggedInAtom} from '../../store';
 type Props = NativeStackScreenProps<
   AuthStackParamList,
   'AuthStack_ProfileScreen'
 >;
 
 const AuthStack_ProfileScreen: React.FC<Props> = ({navigation, route}) => {
+  const [_, setIsLoggedIn] = useAtom(isLoggedInAtom);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
@@ -24,7 +38,45 @@ const AuthStack_ProfileScreen: React.FC<Props> = ({navigation, route}) => {
       setCountryCode(route.params.countryCode);
     }
   }, [route.params]);
-  console.log({countryCode});
+  const onPressToCall = () => {
+    Linking.openURL(`tel:+8801711234567`);
+  };
+  const saveProfile = () => {
+    if (name.trim() === '') {
+      alert('Name is required');
+      return;
+    }
+    if (email.trim() === '') {
+      alert('Email is required');
+      return;
+    }
+    if (phone.trim() === '') {
+      alert('Phone is required');
+      return;
+    }
+    if (password.trim() === '') {
+      alert('Password is required');
+      return;
+    }
+    if (password.trim().length < 6) {
+      alert('Password must be at least 6 characters');
+      return;
+    }
+    const country = countries.find(c => c.code === countryCode).name;
+    const data = {
+      name,
+      email,
+      phone,
+      password,
+      country,
+    };
+    http.post('/user/create', data).then(res => {
+      if (res.data._id) {
+        AsyncStorage.setItem('user', JSON.stringify(res.data));
+        setIsLoggedIn(true);
+      }
+    });
+  };
   return (
     <LinearGradient
       colors={['#FFF', '#1BF2DD']}
@@ -82,14 +134,24 @@ const AuthStack_ProfileScreen: React.FC<Props> = ({navigation, route}) => {
         />
       </View>
       <View style={tw`absolute bottom-0 w-full`}>
-        <Pressable
-          style={tw`h-20 shrink-0 rounded-t-5 bg-white flex-row justify-end items-center`}>
-          <View style={tw`py-2.5 px-8 rounded-[13px] bg-[#FF5C00] mr-5`}>
-            <Text style={tw`text-white text-[18px] font-dm font-bold`}>
-              Start
+        <View
+          style={tw`h-20 shrink-0 rounded-t-5 bg-white flex-row justify-between items-center`}>
+          <View style={tw`ml-5`}>
+            <Text style={tw`text-black font-dm text-[16px] font-bold`}>
+              Customer Service
+            </Text>
+            <Text style={tw`text-[#93999A] font-dm text-[12px] font-normal`}>
+              +8801711234567
             </Text>
           </View>
-        </Pressable>
+          <TouchableOpacity activeOpacity={0.3} onPress={saveProfile}>
+            <View style={tw`py-2.5 px-8 rounded-[13px] bg-[#FF5C00] mr-5`}>
+              <Text style={tw`text-white text-[18px] font-dm font-bold`}>
+                Call
+              </Text>
+            </View>
+          </TouchableOpacity>
+        </View>
       </View>
     </LinearGradient>
   );
