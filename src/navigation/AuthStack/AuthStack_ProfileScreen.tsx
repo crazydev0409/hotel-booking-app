@@ -18,12 +18,12 @@ const AuthStack_ProfileScreen: React.FC<Props> = ({navigation, route}) => {
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [countryCode, setCountryCode] = useState(countries[0].code);
-  // useEffect(() => {
-  //   if (route.params) {
-  //     setPhone(route.params.phoneNumber);
-  //     setCountryCode(route.params.countryCode);
-  //   }
-  // }, [route.params]);
+  useEffect(() => {
+    if (route.params) {
+      setPhone(route.params.phoneNumber);
+      setCountryCode(route.params.countryCode);
+    }
+  }, [route.params]);
   console.log({countryCode});
   return (
     <LinearGradient
