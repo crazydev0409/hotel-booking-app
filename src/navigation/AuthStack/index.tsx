@@ -25,7 +25,7 @@ export type AuthStackParamList = {
 const Stack = createStackNavigator<AuthStackParamList>();
 const AuthStack = () => {
   return (
-    <Stack.Navigator initialRouteName="AuthStack_ProfileScreen">
+    <Stack.Navigator initialRouteName="AuthStack_SigninScreen">
       <Stack.Screen
         name="AuthStack_SigninScreen"
         component={AuthStack_SigninScreen}
