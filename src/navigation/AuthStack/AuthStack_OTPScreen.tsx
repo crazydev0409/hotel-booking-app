@@ -2,14 +2,19 @@ import React, {useEffect, useState} from 'react';
 import {createStackNavigator} from '@react-navigation/stack';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {AuthStackParamList} from '.';
-import {View, Text, Pressable, TextInput} from 'react-native';
+import {View, Text, Pressable, TextInput, TouchableOpacity} from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import tw from '../../../tailwindcss';
 import {FirebaseAuthTypes} from '@react-native-firebase/auth';
+import {http} from '../../helpers/http';
+import {useAtom} from 'jotai';
+import {userAtom} from '../../store';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 type Props = NativeStackScreenProps<AuthStackParamList, 'AuthStack_OTPScreen'>;
 
 const AuthStack_OTPScreen: React.FC<Props> = ({navigation, route}) => {
+  const [user, setUser] = useAtom(userAtom);
   const [code, setCode] = useState('');
   const [confirmResult, setConfirmResult] =
     useState<FirebaseAuthTypes.ConfirmationResult>(null);
@@ -23,9 +28,13 @@ const AuthStack_OTPScreen: React.FC<Props> = ({navigation, route}) => {
     confirmResult
       .confirm(code)
       .then(user => {
-        navigation.navigate('AuthStack_ProfileScreen', {
-          phoneNumber: route.params.phoneNumber,
-          countryCode: route.params.countryCode,
+        const data = {
+          phone: route.params.phoneNumber,
+        };
+        http.post('/user/signup', data).then(res => {
+          setUser(res.data);
+          AsyncStorage.setItem('user', JSON.stringify(res.data));
+          navigation.navigate('AppStack', {screen: 'AppStack_ProfileScreen'});
         });
       })
       .catch(error => {
@@ -57,7 +66,8 @@ const AuthStack_OTPScreen: React.FC<Props> = ({navigation, route}) => {
         Please enter your code here to verify
       </Text>
       <View style={tw`absolute bottom-0 w-full`}>
-        <Pressable
+        <TouchableOpacity
+          activeOpacity={0.5}
           onPress={onPressConfirmCode}
           style={tw`h-20 shrink-0 rounded-t-5 bg-white flex-row justify-end items-center`}>
           <View style={tw`py-2.5 px-8 rounded-[13px] bg-[#FF5C00] mr-5`}>
@@ -65,7 +75,7 @@ const AuthStack_OTPScreen: React.FC<Props> = ({navigation, route}) => {
               Done
             </Text>
           </View>
-        </Pressable>
+        </TouchableOpacity>
       </View>
     </LinearGradient>
   );

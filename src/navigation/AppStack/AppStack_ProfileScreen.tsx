@@ -1,43 +1,25 @@
 import React, {useEffect, useState} from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  Button,
-  Pressable,
-  Image,
-  Linking,
-  TouchableOpacity,
-} from 'react-native';
+import {View, Text, TextInput, Linking, TouchableOpacity} from 'react-native';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import tw from '../../../tailwindcss';
 import LinearGradient from 'react-native-linear-gradient';
-import {Cancel, Cross} from '../../lib/images';
-import {AuthStackParamList} from '.';
 import countries from '../../lib/countryCode';
 import {SvgUri} from 'react-native-svg';
 import {http} from '../../helpers/http';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import {useAtom} from 'jotai';
-import {isLoggedInAtom} from '../../store';
+import GoBackIcon from '../../components/GoBackIcon';
+import {AppStackParamList} from '.';
 type Props = NativeStackScreenProps<
-  AuthStackParamList,
-  'AuthStack_ProfileScreen'
+  AppStackParamList,
+  'AppStack_ProfileScreen'
 >;
 
-const AuthStack_ProfileScreen: React.FC<Props> = ({navigation, route}) => {
-  const [_, setIsLoggedIn] = useAtom(isLoggedInAtom);
+const AppStack_ProfileScreen: React.FC<Props> = ({navigation, route}) => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [countryCode, setCountryCode] = useState(countries[0].code);
-  useEffect(() => {
-    if (route.params) {
-      setPhone(route.params.phoneNumber);
-      setCountryCode(route.params.countryCode);
-    }
-  }, [route.params]);
+
   const onPressToCall = () => {
     Linking.openURL(`tel:+8801711234567`);
   };
@@ -70,12 +52,7 @@ const AuthStack_ProfileScreen: React.FC<Props> = ({navigation, route}) => {
       password,
       country,
     };
-    http.post('/user/create', data).then(res => {
-      if (res.data._id) {
-        AsyncStorage.setItem('user', JSON.stringify(res.data));
-        setIsLoggedIn(true);
-      }
-    });
+    http.post('/user/create', data).then(res => {});
   };
   return (
     <LinearGradient
@@ -84,10 +61,7 @@ const AuthStack_ProfileScreen: React.FC<Props> = ({navigation, route}) => {
       end={{x: 1, y: 1}}
       style={tw`flex-1 relative`}>
       <View style={tw`mt-5 ml-5 mb-10 flex-row items-center`}>
-        <Image source={Cancel} style={tw`w-[38px] h-[38px]`} />
-        <View style={tw`absolute top-[10px] left-[10px] w-full`}>
-          <Image source={Cross} style={tw`w-[18px] h-[18px] z-50`} />
-        </View>
+        <GoBackIcon navigation={navigation} />
         <Text style={tw`font-abril text-black text-[18px] ml-5`}>Profile</Text>
       </View>
       <View style={tw`mx-3`}>
@@ -144,7 +118,7 @@ const AuthStack_ProfileScreen: React.FC<Props> = ({navigation, route}) => {
               +8801711234567
             </Text>
           </View>
-          <TouchableOpacity activeOpacity={0.3} onPress={saveProfile}>
+          <TouchableOpacity activeOpacity={0.5} onPress={saveProfile}>
             <View style={tw`py-2.5 px-8 rounded-[13px] bg-[#FF5C00] mr-5`}>
               <Text style={tw`text-white text-[18px] font-dm font-bold`}>
                 Call
@@ -157,4 +131,4 @@ const AuthStack_ProfileScreen: React.FC<Props> = ({navigation, route}) => {
   );
 };
 
-export default AuthStack_ProfileScreen;
+export default AppStack_ProfileScreen;

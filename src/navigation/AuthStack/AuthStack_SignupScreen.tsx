@@ -1,6 +1,15 @@
 import React, {useEffect, useState} from 'react';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
-import {View, Text, TextInput, Button, Pressable, Image} from 'react-native';
+import {
+  View,
+  Text,
+  TextInput,
+  Button,
+  Pressable,
+  Image,
+  Touchable,
+  TouchableOpacity,
+} from 'react-native';
 import tw from '../../../tailwindcss';
 import LinearGradient from 'react-native-linear-gradient';
 import auth, {firebase} from '@react-native-firebase/auth';
@@ -9,18 +18,18 @@ import countries from '../../lib/countryCode';
 import {AuthStackParamList} from '.';
 type Props = NativeStackScreenProps<
   AuthStackParamList,
-  'AuthStack_SigninScreen'
+  'AuthStack_SignupScreen'
 >;
 const flag = require('../../../assets/images/countries/mexico.png');
 const regexp = /^\+[0-9]?()[0-9](\s|\S)(\d[0-9]{8,16})$/;
 
-const AuthStack_SigninScreen: React.FC<Props> = ({navigation, route}) => {
+const AuthStack_SignupScreen: React.FC<Props> = ({navigation, route}) => {
   const [phone, setPhone] = useState('');
   const [countryCode, setCountryCode] = useState(countries[0].code);
   const countryNumber = countries.find(
     country => country.code === countryCode,
   ).dial_code;
-  const onPressSignIn = () => {
+  const onPressSignUp = () => {
     const phoneNumber = `${countryNumber}${phone}`;
     if (!regexp.test(phoneNumber)) {
       alert('Please Enter Phone Number');
@@ -60,13 +69,13 @@ const AuthStack_SigninScreen: React.FC<Props> = ({navigation, route}) => {
       <View style={tw`flex-row w-full justify-center`}>
         <View
           style={tw`flex-row items-center h-15 w-3/4 bg-white rounded-lg mt-10`}>
-          <Pressable onPress={onPressCountry}>
+          <TouchableOpacity onPress={onPressCountry} activeOpacity={0.5}>
             <SvgUri
               width={60}
               height={30}
               uri={`http://10.0.2.2:8081/assets/svg/${countryCode}.svg`}
             />
-          </Pressable>
+          </TouchableOpacity>
           <Text style={tw`text-black text-[18px] font-dm font-bold`}>
             {countryNumber}
           </Text>
@@ -82,18 +91,19 @@ const AuthStack_SigninScreen: React.FC<Props> = ({navigation, route}) => {
         We Need Phone Number For Your Profile
       </Text>
       <View style={tw`absolute bottom-0 w-full`}>
-        <Pressable
-          onPress={onPressSignIn}
+        <TouchableOpacity
+          activeOpacity={0.5}
+          onPress={onPressSignUp}
           style={tw`h-20 shrink-0 rounded-t-5 bg-white flex-row justify-end items-center`}>
           <View style={tw`py-2.5 px-8 rounded-[13px] bg-[#FF5C00] mr-5`}>
             <Text style={tw`text-white text-[18px] font-dm font-bold`}>
               Start
             </Text>
           </View>
-        </Pressable>
+        </TouchableOpacity>
       </View>
     </LinearGradient>
   );
 };
 
-export default AuthStack_SigninScreen;
+export default AuthStack_SignupScreen;

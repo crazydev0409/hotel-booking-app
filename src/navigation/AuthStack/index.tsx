@@ -1,14 +1,19 @@
 import {createStackNavigator} from '@react-navigation/stack';
 import React from 'react';
 import {View} from 'react-native';
-import AuthStack_SigninScreen from './AuthStack_SigninScreen';
-import AuthStack_ProfileScreen from './AuthStack_ProfileScreen';
+import AuthStack_SignupScreen from './AuthStack_SignupScreen';
+import AuthStack_ProfileScreen from '../AppStack/AppStack_ProfileScreen';
 import AuthStack_CountryScreen from './AuthStack_CountryScreen';
 import AuthStack_OTPScreen from './AuthStack_OTPScreen';
 import {FirebaseAuthTypes} from '@react-native-firebase/auth';
+import {NativeStackScreenProps} from '@react-navigation/native-stack';
+import {RootStackParamList} from 'RootNavigator';
 
 export type AuthStackParamList = {
-  AuthStack_SigninScreen: {
+  AppStack: {
+    screen?: string;
+  };
+  AuthStack_SignupScreen: {
     countryCode: string;
   };
   AuthStack_ProfileScreen: {
@@ -22,13 +27,15 @@ export type AuthStackParamList = {
   };
   AuthStack_CountryScreen: undefined;
 };
+
+type Props = NativeStackScreenProps<RootStackParamList, 'AuthStack'>;
 const Stack = createStackNavigator<AuthStackParamList>();
-const AuthStack = () => {
+const AuthStack: React.FC<Props> = ({navigation, route}) => {
   return (
-    <Stack.Navigator initialRouteName="AuthStack_ProfileScreen">
+    <Stack.Navigator initialRouteName="AuthStack_SignupScreen">
       <Stack.Screen
-        name="AuthStack_SigninScreen"
-        component={AuthStack_SigninScreen}
+        name="AuthStack_SignupScreen"
+        component={AuthStack_SignupScreen}
         options={{headerShown: false}}
       />
       <Stack.Screen

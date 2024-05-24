@@ -1,5 +1,9 @@
 export const Cancel = require('../../assets/images/cancel.png');
 export const Cross = require(`../../assets/images/across.png`);
-
-
+export const Coffee = require(`../../assets/images/coffee.png`);
+export const CoffeeBlack = require(`../../assets/images/coffee_black.png`);
+export const Swimming = require(`../../assets/images/swimming.png`);
+export const SwimmingBlack = require(`../../assets/images/swimming_black.png`);
 export const Mexico = require(`../../assets/images/countries/mexico.png`);
+export const ToBelow = require(`../../assets/images/to_below.png`);
+export const Group = require(`../../assets/images/group.png`);
