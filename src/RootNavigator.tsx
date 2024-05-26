@@ -14,18 +14,8 @@ export type RootStackParamList = {
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 const RootNavigator = () => {
-  const [user, setUser] = useAtom(userAtom);
-  const [isLoggedIn, setIsLoggedIn] = useAtom(isLoggedInAtom);
-  const [isLoading, setIsLoading] = useState(true);
-  useEffect(() => {
-    AsyncStorage.getItem('user').then(user => {
-      if (user) {
-        setUser(JSON.parse(user));
-        setIsLoggedIn(true);
-      }
-      setIsLoading(false);
-    });
-  }, []);
+  const [isLoading] = useState(false);
+
   if (isLoading) {
     return <Loading />;
   }

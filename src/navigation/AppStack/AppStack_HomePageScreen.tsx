@@ -32,7 +32,7 @@ const HotelCard: React.FC = ({navigation}) => {
         style={tw`m-3 rounded-[13px] border-[1px] border-[#0A0A0A] bg-black flex-row`}>
         <Image
           source={{
-            uri: `http://10.0.2.2:8081/assets/images/2200-1000px-banner-Muna-1310x595 15.png`,
+            uri: `http://127.0.0.1:8081/assets/images/2200-1000px-banner-Muna-1310x595 15.png`,
           }}
           style={tw`rounded-[13px] mr-2.5`}
           width={180}
@@ -134,9 +134,9 @@ const AppStack_HomePageScreen: React.FC<Props> = ({navigation}) => {
           </View>
         </View>
         {Array.from({length: 9}).map((_, index) => (
-          <View style={tw`flex-1 flex-col items-center`}>
+          <View style={tw`flex-1 flex-col items-center`} key={index}>
             <Image
-              source={{uri: 'http://10.0.2.2:8081/assets/images/hotel.png'}}
+              source={{uri: 'http://127.0.0.1:8081/assets/images/hotel.png'}}
               width={30}
               height={30}
               style={tw`rounded-full`}
@@ -150,7 +150,11 @@ const AppStack_HomePageScreen: React.FC<Props> = ({navigation}) => {
       </Animated.View>
       <View
         style={tw`absolute bottom-25 left-0 right-0 flex-row justify-center gap-10 z-20`}>
-        <TouchableOpacity activeOpacity={0.5} onPress={() => {}}>
+        <TouchableOpacity
+          activeOpacity={0.5}
+          onPress={() => {
+            navigation.navigate('AppStack_ProfileScreen');
+          }}>
           <View
             style={tw`px-3.5 py-1 flex-row justify-center items-center rounded-full bg-white h-7.5`}>
             <Text

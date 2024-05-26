@@ -28,7 +28,7 @@ const DetailCard: React.FC = () => {
     <View style={tw`flex-1 rounded-[13px] bg-black`}>
       <Image
         source={{
-          uri: 'http://10.0.2.2:8081/assets/images/Rectangle 616.png',
+          uri: 'http://127.0.0.1:8081/assets/images/Rectangle 616.png',
         }}
         height={180}
         style={tw`rounded-[13px] mb-2 w-full`}
@@ -98,11 +98,11 @@ const AppStack_DetailScreen: React.FC<Props> = ({navigation}) => {
       <ScrollView>
         <View style={tw`relative`}>
           <View style={tw`absolute top-5 left-5 z-10`}>
-            <GoBackIcon navigation={navigation} />
+            <GoBackIcon onPress={() => navigation.goBack()} />
           </View>
           <Image
             source={{
-              uri: 'http://10.0.2.2:8081/assets/images/2200-1000px-banner-Muna-1310x595 13.png',
+              uri: 'http://127.0.0.1:8081/assets/images/2200-1000px-banner-Muna-1310x595 13.png',
             }}
             style={tw`w-full h-96`}
           />

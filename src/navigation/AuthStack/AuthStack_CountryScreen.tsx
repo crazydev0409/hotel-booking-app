@@ -33,7 +33,7 @@ const CountryCodeCard = ({flag, country, code, onPress}) => {
             <SvgUri
               width={60}
               height={30}
-              uri={`http://10.0.2.2:8081/assets/svg/${flag}.svg`}
+              uri={`http://127.0.0.1:8081/assets/svg/${flag}.svg`}
             />
           </View>
           {/* <Image source={flag} style={tw`w-15 h-7.5 ml-1.5 mr-5`} /> */}
@@ -48,14 +48,31 @@ const CountryCodeCard = ({flag, country, code, onPress}) => {
     </TouchableOpacity>
   );
 };
-const AuthStack_CountryScreen: React.FC<Props> = ({navigation}) => {
+const AuthStack_CountryScreen: React.FC<Props> = ({navigation, route}) => {
   const onPressGoBack = () => {
     navigation.goBack();
   };
   const onPressCode = (flag: string) => {
-    navigation.navigate('AuthStack_SignupScreen', {
-      countryCode: flag,
-    });
+    if (route.params.from === 'sign_up') {
+      navigation.navigate('AuthStack_SignupScreen', {
+        countryCode: flag,
+      });
+    } else if (route.params.from === 'sign_in') {
+      navigation.navigate('AuthStack_SigninScreen', {
+        countryCode: flag,
+      });
+    } else if (route.params.from === 'profile') {
+      navigation.navigate('AppStack', {
+        screen: 'AppStack_ProfileScreen',
+        params: {
+          countryCode: flag,
+        },
+      });
+    } else {
+      navigation.navigate('AuthStack_SignupScreen', {
+        countryCode: flag,
+      });
+    }
   };
   return (
     <LinearGradient
@@ -67,7 +84,7 @@ const AuthStack_CountryScreen: React.FC<Props> = ({navigation}) => {
         <View style={tw`mt-5 ml-5 mb-10 flex-row items-center`}>
           <TouchableOpacity onPress={onPressGoBack} activeOpacity={0.5}>
             <View>
-              <GoBackIcon navigation={navigation} />
+              <GoBackIcon onPress={() => navigation.goBack()} />
             </View>
           </TouchableOpacity>
           <Text style={tw`font-abril text-black text-[18px] ml-5`}>

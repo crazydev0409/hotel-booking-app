@@ -23,19 +23,50 @@ const AuthStack_OTPScreen: React.FC<Props> = ({navigation, route}) => {
     if (route.params?.confirmResult) {
       setConfirmResult(route.params.confirmResult);
     }
-  }, [route.params.confirmResult]);
+  }, [route.params]);
+
   const onPressConfirmCode = () => {
     confirmResult
       .confirm(code)
-      .then(user => {
-        const data = {
-          phone: route.params.phoneNumber,
-        };
-        http.post('/user/signup', data).then(res => {
-          setUser(res.data);
-          AsyncStorage.setItem('user', JSON.stringify(res.data));
-          navigation.navigate('AppStack', {screen: 'AppStack_ProfileScreen'});
-        });
+      .then(confirmResponse => {
+        if (route.params.from === 'sign_up') {
+          const data = {
+            phone: route.params.phoneNumber,
+            country: route.params.countryCode,
+          };
+          http.post('/user/signup', data).then(res => {
+            console.log({mesaage: res.data.message});
+            if (res.data.message === 'User already exists') {
+              navigation.navigate('AuthStack_SigninScreen', {
+                countryCode: route.params.countryCode,
+                passwordRequired: Boolean(res.data.data.password),
+              });
+            } else {
+              navigation.navigate('AppStack', {
+                screen: 'AppStack_ProfileScreen',
+              });
+            }
+            setUser(res.data.data);
+          });
+        } else if (route.params.from === 'profile') {
+          const data = {
+            type: route.params.type,
+            value: route.params.value,
+          };
+          http
+            .patch(`/user/update/${user._id}`, data)
+            .then(response => {
+              if (response.data.message === 'Phone number already exists') {
+                alert('Phone number already exists');
+              } else {
+                setUser(response.data.data);
+              }
+              navigation.goBack();
+            })
+            .catch(error => {
+              console.log({error});
+            });
+        }
       })
       .catch(error => {
         alert(error.message);
@@ -57,7 +88,7 @@ const AuthStack_OTPScreen: React.FC<Props> = ({navigation, route}) => {
           <TextInput
             style={tw`bg-white rounded-lg flex-1 font-dm font-bold text-[18px] text-center`}
             value={code}
-            placeholder="Phone Number?"
+            placeholder="Code"
             onChangeText={setCode}
           />
         </View>

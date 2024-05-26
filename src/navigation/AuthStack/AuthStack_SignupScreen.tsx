@@ -16,16 +16,17 @@ import auth, {firebase} from '@react-native-firebase/auth';
 import {SvgUri} from 'react-native-svg';
 import countries from '../../lib/countryCode';
 import {AuthStackParamList} from '.';
+import {http} from '../../helpers/http';
 type Props = NativeStackScreenProps<
   AuthStackParamList,
   'AuthStack_SignupScreen'
 >;
 const flag = require('../../../assets/images/countries/mexico.png');
 const regexp = /^\+[0-9]?()[0-9](\s|\S)(\d[0-9]{8,16})$/;
-
+const initialCode = 'US';
 const AuthStack_SignupScreen: React.FC<Props> = ({navigation, route}) => {
   const [phone, setPhone] = useState('');
-  const [countryCode, setCountryCode] = useState(countries[0].code);
+  const [countryCode, setCountryCode] = useState(initialCode);
   const countryNumber = countries.find(
     country => country.code === countryCode,
   ).dial_code;
@@ -42,6 +43,7 @@ const AuthStack_SignupScreen: React.FC<Props> = ({navigation, route}) => {
           confirmResult,
           phoneNumber,
           countryCode,
+          from: 'sign_up',
         });
       })
       .catch(error => {
@@ -54,7 +56,9 @@ const AuthStack_SignupScreen: React.FC<Props> = ({navigation, route}) => {
     }
   }, [route.params?.countryCode]);
   const onPressCountry = () => {
-    navigation.navigate('AuthStack_CountryScreen');
+    navigation.navigate('AuthStack_CountryScreen', {
+      from: 'sign_up',
+    });
   };
   return (
     <LinearGradient
@@ -73,14 +77,14 @@ const AuthStack_SignupScreen: React.FC<Props> = ({navigation, route}) => {
             <SvgUri
               width={60}
               height={30}
-              uri={`http://10.0.2.2:8081/assets/svg/${countryCode}.svg`}
+              uri={`http://127.0.0.1:8081/assets/svg/${countryCode}.svg`}
             />
           </TouchableOpacity>
           <Text style={tw`text-black text-[18px] font-dm font-bold`}>
             {countryNumber}
           </Text>
           <TextInput
-            style={tw`bg-white rounded-lg flex-1 font-dm font-bold text-[18px]`}
+            style={tw`bg-white rounded-lg flex-1 font-dm font-bold text-[18px] mt-0.7`}
             value={phone}
             placeholder="Phone Number?"
             onChangeText={setPhone}
