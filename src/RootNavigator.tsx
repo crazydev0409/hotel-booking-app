@@ -1,10 +1,6 @@
-import React, {useEffect, useState} from 'react';
-import {ActivityIndicator} from 'react-native';
+import React, {useState} from 'react';
 import AuthStack from './navigation/AuthStack';
 import AppStack from './navigation/AppStack';
-import {isLoggedInAtom, userAtom} from './store';
-import {useAtom} from 'jotai';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import Loading from './components/Loading';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 export type RootStackParamList = {

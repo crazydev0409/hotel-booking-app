@@ -7,3 +7,4 @@ export const SwimmingBlack = require(`../../assets/images/swimming_black.png`);
 export const Mexico = require(`../../assets/images/countries/mexico.png`);
 export const ToBelow = require(`../../assets/images/to_below.png`);
 export const Group = require(`../../assets/images/group.png`);
+export const Marker = require(`../../assets/images/marker.png`);

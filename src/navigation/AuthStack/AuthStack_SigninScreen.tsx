@@ -16,6 +16,7 @@ import {useAtom} from 'jotai';
 import {userAtom} from '../../store';
 import countries from '../../lib/countryCode';
 import {http} from '../../helpers/http';
+import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 
 type Props = NativeStackScreenProps<
   AuthStackParamList,
@@ -82,63 +83,68 @@ const AuthStack_SigninScreen: React.FC<Props> = ({navigation, route}) => {
   };
 
   return (
-    <LinearGradient
-      colors={['#FFF', '#1BF2DD']}
-      start={{x: 0, y: 0}}
-      end={{x: 1, y: 1}}
-      style={tw`flex-1 relative`}>
-      <Text
-        style={tw`mt-50 mb-10 self-stretch text-center text-[32px] font-normal text-black font-medium font-abril`}>
-        Welcome
-      </Text>
-      <View style={tw`flex flex-col w-full items-center`}>
-        <View
-          style={tw`flex-row items-center h-15 w-3/4 bg-white rounded-lg mt-10`}>
-          <TouchableOpacity onPress={onPressCountry} activeOpacity={0.5}>
-            <SvgUri
-              width={60}
-              height={30}
-              uri={`http://127.0.0.1:8081/assets/svg/${countryCode}.svg`}
-            />
-          </TouchableOpacity>
-          <Text style={tw`text-black text-[18px] font-dm font-bold`}>
-            {countryNumber}
-          </Text>
-          <TextInput
-            style={tw`bg-white rounded-lg flex-1 font-dm font-bold text-[18px] mt-0.7`}
-            value={phone}
-            placeholder="Phone Number?"
-            onChangeText={setPhone}
-          />
-        </View>
-        {passwordRequired && (
+    <KeyboardAwareScrollView
+      contentContainerStyle={tw`flex-grow`}
+      resetScrollToCoords={{x: 0, y: 0}}
+      scrollEnabled={true}>
+      <LinearGradient
+        colors={['#FFF', '#1BF2DD']}
+        start={{x: 0, y: 0}}
+        end={{x: 1, y: 1}}
+        style={tw`flex-1 relative`}>
+        <Text
+          style={tw`mt-50 mb-10 self-stretch text-center text-[32px] font-normal text-black font-medium font-abril`}>
+          Welcome
+        </Text>
+        <View style={tw`flex flex-col w-full items-center`}>
           <View
-            style={tw`flex-row items-center h-15 w-3/4 bg-white rounded-lg mt-4.5`}>
+            style={tw`flex-row items-center h-15 w-3/4 bg-white rounded-lg mt-10`}>
+            <TouchableOpacity onPress={onPressCountry} activeOpacity={0.5}>
+              <SvgUri
+                width={60}
+                height={30}
+                uri={`http://127.0.0.1:8081/assets/svg/${countryCode}.svg`}
+              />
+            </TouchableOpacity>
+            <Text style={tw`text-black text-[18px] font-dm font-bold`}>
+              {countryNumber}
+            </Text>
             <TextInput
-              style={tw`bg-white rounded-lg flex-1 font-dm font-bold text-[18px] text-center`}
-              secureTextEntry={password.length === 0 && !passwordFocus}
-              value={password}
-              placeholder="Password"
-              onChangeText={setPassword}
+              style={tw`bg-white rounded-lg flex-1 font-dm font-bold text-[18px] mt-0.7`}
+              value={phone}
+              placeholder="Phone Number?"
+              onChangeText={setPhone}
             />
           </View>
-        )}
-      </View>
-      {!passwordFocus && (
-        <View style={tw`absolute bottom-0 w-full`}>
-          <TouchableOpacity
-            activeOpacity={0.5}
-            onPress={onPressSignIn}
-            style={tw`h-20 rounded-t-5 bg-white flex-row justify-end items-center`}>
-            <View style={tw`py-2.5 px-8 rounded-[13px] bg-[#FF5C00] mr-5`}>
-              <Text style={tw`text-white text-[18px] font-dm font-bold`}>
-                Done
-              </Text>
+          {passwordRequired && (
+            <View
+              style={tw`flex-row items-center h-15 w-3/4 bg-white rounded-lg mt-4.5`}>
+              <TextInput
+                style={tw`bg-white rounded-lg flex-1 font-dm font-bold text-[18px] text-center`}
+                secureTextEntry={password.length === 0 && !passwordFocus}
+                value={password}
+                placeholder="Password"
+                onChangeText={setPassword}
+              />
             </View>
-          </TouchableOpacity>
+          )}
         </View>
-      )}
-    </LinearGradient>
+        {!passwordFocus && (
+          <View style={tw`absolute bottom-0 w-full`}>
+            <TouchableOpacity
+              activeOpacity={0.5}
+              onPress={onPressSignIn}
+              style={tw`h-20 rounded-t-5 bg-white flex-row justify-end items-center`}>
+              <View style={tw`py-2.5 px-8 rounded-[13px] bg-[#FF5C00] mr-5`}>
+                <Text style={tw`text-white text-[18px] font-dm font-bold`}>
+                  Done
+                </Text>
+              </View>
+            </TouchableOpacity>
+          </View>
+        )}
+      </LinearGradient>
+    </KeyboardAwareScrollView>
   );
 };
 

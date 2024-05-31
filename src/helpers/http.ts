@@ -6,3 +6,5 @@ export const http = axios.create({
     'Content-Type': 'application/json',
   },
 });
+
+export const mapApiKey = process.env.PLACE_API_KEY;

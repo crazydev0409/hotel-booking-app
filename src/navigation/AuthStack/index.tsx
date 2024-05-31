@@ -1,12 +1,13 @@
-import {createStackNavigator} from '@react-navigation/stack';
 import React from 'react';
-import {View} from 'react-native';
 import AuthStack_SignupScreen from './AuthStack_SignupScreen';
 import AuthStack_CountryScreen from './AuthStack_CountryScreen';
 import AuthStack_SigninScreen from './AuthStack_SigninScreen';
 import AuthStack_OTPScreen from './AuthStack_OTPScreen';
 import {FirebaseAuthTypes} from '@react-native-firebase/auth';
-import {NativeStackScreenProps} from '@react-navigation/native-stack';
+import {
+  NativeStackScreenProps,
+  createNativeStackNavigator,
+} from '@react-navigation/native-stack';
 import {RootStackParamList} from 'RootNavigator';
 import AppStack from '../../navigation/AppStack';
 
@@ -35,10 +36,10 @@ export type AuthStackParamList = {
 };
 
 type Props = NativeStackScreenProps<RootStackParamList, 'AuthStack'>;
-const Stack = createStackNavigator<AuthStackParamList>();
+const Stack = createNativeStackNavigator<AuthStackParamList>();
 const AuthStack: React.FC<Props> = ({navigation, route}) => {
   return (
-    <Stack.Navigator initialRouteName="AuthStack_SigninScreen">
+    <Stack.Navigator initialRouteName="AuthStack_SignupScreen">
       <Stack.Screen
         name="AuthStack_SignupScreen"
         component={AuthStack_SignupScreen}

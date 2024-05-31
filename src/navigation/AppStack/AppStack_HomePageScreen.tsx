@@ -10,7 +10,10 @@ import {
   FlatList,
   TouchableOpacity,
 } from 'react-native';
-import {NativeStackScreenProps} from '@react-navigation/native-stack';
+import {
+  NativeStackNavigationProp,
+  NativeStackScreenProps,
+} from '@react-navigation/native-stack';
 import {AppStackParamList} from '.';
 import MapView, {PROVIDER_GOOGLE, Marker} from 'react-native-maps';
 import tw from '../../../tailwindcss';
@@ -21,14 +24,26 @@ type Props = NativeStackScreenProps<
   AppStackParamList,
   'AppStack_HomePageScreen'
 >;
+
+interface ICardProps {
+  navigation: NativeStackNavigationProp<
+    AppStackParamList,
+    'AppStack_HomePageScreen'
+  >;
+  setCardHeight: React.Dispatch<React.SetStateAction<number>>;
+}
 const windowsHeight = Dimensions.get('window').height;
-const HotelCard: React.FC = ({navigation}) => {
+console.log({windowsHeight});
+const HotelCard: React.FC = ({navigation, setCardHeight}: ICardProps) => {
   const onPressToDetail = () => {
     navigation.navigate('AppStack_DetailScreen');
   };
   return (
     <TouchableOpacity onPress={onPressToDetail} activeOpacity={0.5}>
       <View
+        onLayout={event => {
+          setCardHeight(event.nativeEvent.layout.height);
+        }}
         style={tw`m-3 rounded-[13px] border-[1px] border-[#0A0A0A] bg-black flex-row`}>
         <Image
           source={{
@@ -90,9 +105,17 @@ const HotelCard: React.FC = ({navigation}) => {
 };
 const AppStack_HomePageScreen: React.FC<Props> = ({navigation}) => {
   const [showText, setShowText] = useState(true);
+  const [cardHeight, setCardHeight] = useState(0);
   const mousePositionRef = useRef(0);
+  const [itemCount, setItemCount] = useState(4);
   const topSheetPosition = useAnimatedValue(windowsHeight - 80);
   const topListBackgroundOpactiy = useAnimatedValue(0);
+  const animatedStyle = {
+    backgroundColor: topListBackgroundOpactiy.interpolate({
+      inputRange: [0, 1],
+      outputRange: ['rgba(255,255,255,0)', 'rgba(255,255,255,1)'],
+    }),
+  };
   const panResponder = PanResponder.create({
     onStartShouldSetPanResponder: () => true,
     onPanResponderGrant: (event, gestureState) => {
@@ -107,9 +130,15 @@ const AppStack_HomePageScreen: React.FC<Props> = ({navigation}) => {
       topListBackgroundOpactiy.setValue(
         (windowsHeight - currentPoint) / (windowsHeight - 60),
       );
-      // Subtract the gestureState.dy from the initial position of the bottom sheet
-      // Stop at -200
-      if (currentPoint > 60 && currentPoint < windowsHeight - 20)
+      const cardsPullingHeight = (cardHeight + 26) * itemCount + 48;
+      const limitPullingHeight =
+        cardsPullingHeight + 60 > windowsHeight
+          ? 60
+          : windowsHeight - cardsPullingHeight;
+      if (
+        currentPoint > limitPullingHeight &&
+        currentPoint < windowsHeight - 20
+      )
         topSheetPosition.setValue(currentPoint);
     },
     onPanResponderRelease: () => {
@@ -124,15 +153,18 @@ const AppStack_HomePageScreen: React.FC<Props> = ({navigation}) => {
     <View style={tw`flex-1 relative`}>
       <Animated.View
         style={{
-          ...tw`flex-row items-start absolute top-0 left-0 pt-3 right-0 h-20 z-10 bg-white`,
-          opacity: topListBackgroundOpactiy,
+          ...tw`flex-row items-start absolute top-0 left-0 pt-3 right-0 h-20 z-10`,
+          ...animatedStyle,
         }}>
-        <View style={tw`relative mx-3 mb-2`}>
+        <TouchableOpacity
+          activeOpacity={0.5}
+          style={tw`relative mx-3 mb-2`}
+          onPress={() => navigation.navigate('AppStack_PriceFilterScreen')}>
           <Image source={Cancel} style={tw`w-[38px] h-[38px]`} />
           <View style={tw`absolute top-[10px] left-[10px] w-full`}>
             <Image source={ToBelow} style={tw`w-[18px] h-[18px] z-50`} />
           </View>
-        </View>
+        </TouchableOpacity>
         {Array.from({length: 9}).map((_, index) => (
           <View style={tw`flex-1 flex-col items-center`} key={index}>
             <Image
@@ -163,7 +195,11 @@ const AppStack_HomePageScreen: React.FC<Props> = ({navigation}) => {
             </Text>
           </View>
         </TouchableOpacity>
-        <TouchableOpacity activeOpacity={0.5} onPress={() => {}}>
+        <TouchableOpacity
+          activeOpacity={0.5}
+          onPress={() => {
+            navigation.navigate('AppStack_HotelSearch');
+          }}>
           <View
             style={tw`px-13 py-2 flex-row justify-center items-center rounded-full bg-[#222222]/50 h-7.5`}>
             <Text style={tw`text-white font-dm text-[11px] capitalize`}>
@@ -220,11 +256,47 @@ const AppStack_HomePageScreen: React.FC<Props> = ({navigation}) => {
               Over 1000 Amazing Places
             </Text>
           )}
+
           <FlatList
-            data={[1, 2, 3, 4, 5]}
+            data={Array.from({length: itemCount}, (_, index) => index + 1)}
             keyExtractor={item => item.toString()}
-            renderItem={() => <HotelCard navigation={navigation} />}
+            style={{maxHeight: windowsHeight - 180}}
+            renderItem={() => (
+              <HotelCard
+                navigation={navigation}
+                setCardHeight={setCardHeight}
+              />
+            )}
           />
+          <View
+            style={tw`flex-row justify-center items-center gap-10 z-20 h-17.5`}>
+            <TouchableOpacity
+              activeOpacity={0.5}
+              onPress={() => {
+                setShowText(true);
+                topSheetPosition.setValue(windowsHeight - 80);
+              }}>
+              <View
+                style={tw`px-3.5 py-1 flex-row justify-center items-center rounded-full bg-white h-7.5`}>
+                <Text
+                  style={tw`text-black font-dm text-[16px] capitalize font-bold`}>
+                  Map
+                </Text>
+              </View>
+            </TouchableOpacity>
+            <TouchableOpacity
+              activeOpacity={0.5}
+              onPress={() => {
+                navigation.navigate('AppStack_HotelSearch');
+              }}>
+              <View
+                style={tw`px-13 py-2 flex-row justify-center items-center rounded-full bg-[#222222]/50 h-7.5`}>
+                <Text style={tw`text-white font-dm text-[11px] capitalize`}>
+                  Where to?
+                </Text>
+              </View>
+            </TouchableOpacity>
+          </View>
         </LinearGradient>
       </Animated.View>
     </View>
