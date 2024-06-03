@@ -25,9 +25,7 @@ const ImageCard: React.FC = () => {
     <View>
       <View style={tw`w-25 h-25 rounded-[13px]`}>
         <Image
-          source={{
-            uri: 'http://127.0.0.1:8081/assets/images/2200-1000px-banner-Muna-1310x595 13.png',
-          }}
+          source={require('../../../assets/images/2200-1000px-banner-Muna-1310x595 13.png')}
           style={tw`w-full h-full rounded-[13px]`}
         />
       </View>
@@ -96,7 +94,7 @@ const AppStack_PriceFilterScreen: React.FC<Props> = ({navigation, route}) => {
             value="Dhaka">
             <View style={tw`flex-col items-center px-16`}>
               <Image
-                source={{uri: 'http://127.0.0.1:8081/assets/images/hotel.png'}}
+                source={require('../../../assets/images/hotel.png')}
                 width={30}
                 height={30}
                 style={tw`rounded-full mb-5`}

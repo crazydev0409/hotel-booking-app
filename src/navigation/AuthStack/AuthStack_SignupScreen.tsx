@@ -74,10 +74,13 @@ const AuthStack_SignupScreen: React.FC<Props> = ({navigation, route}) => {
         <View
           style={tw`flex-row items-center h-15 w-3/4 bg-white rounded-lg mt-10`}>
           <TouchableOpacity onPress={onPressCountry} activeOpacity={0.5}>
-            <SvgUri
+            <Image
               width={60}
               height={30}
-              uri={`http://127.0.0.1:8081/assets/svg/${countryCode}.svg`}
+              source={{
+                uri: `https://flagcdn.com/w320/${countryCode.toLowerCase()}.png`,
+              }}
+              style={tw`mx-2.5`}
             />
           </TouchableOpacity>
           <Text style={tw`text-black text-[18px] font-dm font-bold`}>

@@ -31,9 +31,7 @@ const ImageCard: React.FC = () => {
     <View>
       <View style={tw`w-25 h-25 rounded-[13px]`}>
         <Image
-          source={{
-            uri: 'http://127.0.0.1:8081/assets/images/2200-1000px-banner-Muna-1310x595 13.png',
-          }}
+          source={require('../../../assets/images/2200-1000px-banner-Muna-1310x595 13.png')}
           style={tw`w-full h-full rounded-[13px]`}
         />
       </View>
@@ -54,6 +52,7 @@ const AppStack_HotelSearch: React.FC<Props> = ({navigation, route}) => {
   const [guests, setGuests] = useState({adults: 0, children: 0, infants: 0});
   const [keyBoardShow, setKeyBoardShow] = useState(false);
   const locationSearchWidth = useRef(new Animated.Value(0)).current;
+  console.log({locationSelected: JSON.stringify(locationSelected)});
   const locationSearchWidthAnim = Animated.timing(locationSearchWidth, {
     toValue: locationFocus ? screenWidth - 50 : 264,
     duration: 200,
@@ -109,7 +108,16 @@ const AppStack_HotelSearch: React.FC<Props> = ({navigation, route}) => {
     setGuests({adults: 0, children: 0, infants: 0});
   };
   const confirmSearch = () => {
-    navigation.navigate('AppStack_HomePageScreen');
+    if (!locationSelected.name) return alert('Please select a location');
+    if (tripDate === 'I am Flexible') return alert('Please select a date');
+    if (guests.adults === 0 && guests.children === 0 && guests.infants === 0)
+      return alert('Please select number of guests');
+    navigation.navigate('AppStack_HomePageScreen', {
+      searchResult: {
+        latitude: locationSelected.geometry.location.lat,
+        longitude: locationSelected.geometry.location.lng,
+      },
+    });
   };
   return (
     <KeyboardAwareScrollView

@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 export const http = axios.create({
-  baseURL: process.env.API_URL || 'http://192.168.8.183:3000/api',
+  baseURL: "https://hotel-booking-backend-splu.onrender.com/api",
   headers: {
     'Content-Type': 'application/json',
   },

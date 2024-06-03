@@ -30,10 +30,12 @@ const CountryCodeCard = ({flag, country, code, onPress}) => {
         <View style={tw`w-1/2 flex-row items-center`}>
           <View
             style={tw`h-7.5 w-15 ml-1.5 mr-5 rounded-[13px] overflow-hidden`}>
-            <SvgUri
+            <Image
               width={60}
               height={30}
-              uri={`http://127.0.0.1:8081/assets/svg/${flag}.svg`}
+              source={{
+                uri: `https://flagcdn.com/w320/${flag.toLowerCase()}.png`,
+              }}
             />
           </View>
           {/* <Image source={flag} style={tw`w-15 h-7.5 ml-1.5 mr-5`} /> */}

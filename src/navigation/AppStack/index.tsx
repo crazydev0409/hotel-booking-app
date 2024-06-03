@@ -11,7 +11,12 @@ import AuthStack from '../../navigation/AuthStack';
 import AppStack_HotelSearch from './Appstack_HotelSearch';
 import AppStack_PriceFilterScreen from './AppStack_PriceFilterScreen';
 export type AppStackParamList = {
-  AppStack_HomePageScreen: undefined;
+  AppStack_HomePageScreen?: {
+    searchResult: {
+      latitude: number;
+      longitude: number;
+    };
+  };
   AppStack_DetailScreen: undefined;
   AppStack_HotelSearch: undefined;
   AppStack_LocationSearch: undefined;

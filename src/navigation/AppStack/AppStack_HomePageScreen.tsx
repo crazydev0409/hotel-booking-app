@@ -1,4 +1,4 @@
-import React, {useRef, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {
   Text,
   View,
@@ -33,7 +33,6 @@ interface ICardProps {
   setCardHeight: React.Dispatch<React.SetStateAction<number>>;
 }
 const windowsHeight = Dimensions.get('window').height;
-console.log({windowsHeight});
 const HotelCard: React.FC = ({navigation, setCardHeight}: ICardProps) => {
   const onPressToDetail = () => {
     navigation.navigate('AppStack_DetailScreen');
@@ -46,9 +45,7 @@ const HotelCard: React.FC = ({navigation, setCardHeight}: ICardProps) => {
         }}
         style={tw`m-3 rounded-[13px] border-[1px] border-[#0A0A0A] bg-black flex-row`}>
         <Image
-          source={{
-            uri: `http://127.0.0.1:8081/assets/images/2200-1000px-banner-Muna-1310x595 15.png`,
-          }}
+          source={require('../../../assets/images/2200-1000px-banner-Muna-1310x595 15.png')}
           style={tw`rounded-[13px] mr-2.5`}
           width={180}
           height={180}
@@ -103,11 +100,17 @@ const HotelCard: React.FC = ({navigation, setCardHeight}: ICardProps) => {
     </TouchableOpacity>
   );
 };
-const AppStack_HomePageScreen: React.FC<Props> = ({navigation}) => {
+const AppStack_HomePageScreen: React.FC<Props> = ({navigation, route}) => {
   const [showText, setShowText] = useState(true);
   const [cardHeight, setCardHeight] = useState(0);
   const mousePositionRef = useRef(0);
   const [itemCount, setItemCount] = useState(4);
+  const [region, setRegion] = useState({
+    latitude: 37.78825,
+    longitude: -122.4324,
+    latitudeDelta: 0.0922,
+    longitudeDelta: 0.0421,
+  });
   const topSheetPosition = useAnimatedValue(windowsHeight - 80);
   const topListBackgroundOpactiy = useAnimatedValue(0);
   const animatedStyle = {
@@ -149,6 +152,17 @@ const AppStack_HomePageScreen: React.FC<Props> = ({navigation}) => {
       // If the position is above -200, snap back to -400
     },
   });
+  console.log({region});
+  useEffect(() => {
+    if (route.params?.searchResult) {
+      setRegion({
+        latitude: route.params.searchResult.latitude,
+        longitude: route.params.searchResult.longitude,
+        latitudeDelta: 0.0922,
+        longitudeDelta: 0.0421,
+      });
+    }
+  }, [route.params?.searchResult]);
   return (
     <View style={tw`flex-1 relative`}>
       <Animated.View
@@ -168,7 +182,7 @@ const AppStack_HomePageScreen: React.FC<Props> = ({navigation}) => {
         {Array.from({length: 9}).map((_, index) => (
           <View style={tw`flex-1 flex-col items-center`} key={index}>
             <Image
-              source={{uri: 'http://127.0.0.1:8081/assets/images/hotel.png'}}
+              source={require('../../../assets/images/hotel.png')}
               width={30}
               height={30}
               style={tw`rounded-full`}
@@ -213,12 +227,7 @@ const AppStack_HomePageScreen: React.FC<Props> = ({navigation}) => {
         mapType="standard"
         style={tw`h-full w-full`}
         provider={PROVIDER_GOOGLE}
-        initialRegion={{
-          latitude: 37.78825,
-          longitude: -122.4324,
-          latitudeDelta: 0.0922,
-          longitudeDelta: 0.0421,
-        }}>
+        region={region}>
         <Marker
           coordinate={{
             latitude: 37.78825,
