@@ -104,7 +104,9 @@ const AppStack_HomePageScreen: React.FC<Props> = ({navigation, route}) => {
   const [showText, setShowText] = useState(true);
   const [cardHeight, setCardHeight] = useState(0);
   const mousePositionRef = useRef(0);
-  const [itemCount, setItemCount] = useState(4);
+  const directionRef = useRef(false);
+  const gestureDyRef = useRef(0);
+  const [itemCount, setItemCount] = useState(7);
   const [region, setRegion] = useState({
     latitude: 37.78825,
     longitude: -122.4324,
@@ -119,40 +121,80 @@ const AppStack_HomePageScreen: React.FC<Props> = ({navigation, route}) => {
       outputRange: ['rgba(255,255,255,0)', 'rgba(255,255,255,1)'],
     }),
   };
+  const calculateCurrentPoint = gestureState =>
+    mousePositionRef.current + gestureState.dy;
+
+  const calculateLimitPullingHeight = cardsPullingHeight =>
+    cardsPullingHeight + 60 > windowsHeight
+      ? 60
+      : windowsHeight - cardsPullingHeight;
+
+  const calculateCardsPullingHeight = () => (cardHeight + 26) * itemCount + 48;
+
+  const setTopSheetPosition = (value, callback = () => {}) => {
+    Animated.spring(topSheetPosition, {
+      toValue: value,
+      useNativeDriver: false,
+    }).start(callback);
+  };
+
   const panResponder = PanResponder.create({
     onStartShouldSetPanResponder: () => true,
-    onPanResponderGrant: (event, gestureState) => {
-      // Set the initial position of the bottom sheet
+    onPanResponderGrant: () => {
       mousePositionRef.current = topSheetPosition._value;
     },
     onPanResponderMove: (event, gestureState) => {
+      directionRef.current = gestureDyRef.current >= gestureState.dy;
+      gestureDyRef.current = gestureState.dy;
+
       if (showText === true && gestureState.dy < 0) {
         setShowText(false);
       }
-      const currentPoint = mousePositionRef.current + gestureState.dy;
+
+      const currentPoint = calculateCurrentPoint(gestureState);
+      const cardsPullingHeight = calculateCardsPullingHeight();
+      const limitPullingHeight =
+        calculateLimitPullingHeight(cardsPullingHeight);
+
       topListBackgroundOpactiy.setValue(
         (windowsHeight - currentPoint) / (windowsHeight - 60),
       );
-      const cardsPullingHeight = (cardHeight + 26) * itemCount + 48;
-      const limitPullingHeight =
-        cardsPullingHeight + 60 > windowsHeight
-          ? 60
-          : windowsHeight - cardsPullingHeight;
+
       if (
         currentPoint > limitPullingHeight &&
         currentPoint < windowsHeight - 20
-      )
+      ) {
         topSheetPosition.setValue(currentPoint);
+      }
     },
-    onPanResponderRelease: () => {
+    onPanResponderRelease: (event, gestureState) => {
+      const currentPoint = calculateCurrentPoint(gestureState);
+      const cardsPullingHeight = calculateCardsPullingHeight();
+      const limitPullingHeight =
+        calculateLimitPullingHeight(cardsPullingHeight);
+
+      topListBackgroundOpactiy.setValue(
+        (windowsHeight - currentPoint) / (windowsHeight - 60),
+      );
+
       if (topSheetPosition._value > windowsHeight - 60) {
         setShowText(true);
         topSheetPosition.setValue(windowsHeight - 80);
+      } else {
+        if (directionRef.current) {
+          setTopSheetPosition(limitPullingHeight, () => {
+            topListBackgroundOpactiy.setValue(1);
+          });
+        } else {
+          setTopSheetPosition(windowsHeight - 60, () => {
+            setShowText(true);
+            topSheetPosition.setValue(windowsHeight - 80);
+            topListBackgroundOpactiy.setValue(0);
+          });
+        }
       }
-      // If the position is above -200, snap back to -400
     },
   });
-  console.log({region});
   useEffect(() => {
     if (route.params?.searchResult) {
       setRegion({
@@ -283,7 +325,7 @@ const AppStack_HomePageScreen: React.FC<Props> = ({navigation, route}) => {
               activeOpacity={0.5}
               onPress={() => {
                 setShowText(true);
-                topSheetPosition.setValue(windowsHeight - 80);
+                setTopSheetPosition(windowsHeight - 80);
               }}>
               <View
                 style={tw`px-3.5 py-1 flex-row justify-center items-center rounded-full bg-white h-7.5`}>

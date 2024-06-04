@@ -10,6 +10,8 @@ import {RootStackParamList} from 'RootNavigator';
 import AuthStack from '../../navigation/AuthStack';
 import AppStack_HotelSearch from './Appstack_HotelSearch';
 import AppStack_PriceFilterScreen from './AppStack_PriceFilterScreen';
+import {FirebaseAuthTypes} from '@react-native-firebase/auth';
+import AuthStack_OTPScreen from '../AuthStack/AuthStack_OTPScreen';
 export type AppStackParamList = {
   AppStack_HomePageScreen?: {
     searchResult: {
@@ -24,8 +26,16 @@ export type AppStackParamList = {
   AppStack_ProfileScreen: {
     countryCode: string;
   };
-  AuthStack: {
-    screen?: string;
+  AuthStack_OTPScreen: {
+    confirmResult: FirebaseAuthTypes.ConfirmationResult;
+    phoneNumber?: string;
+    countryCode?: string;
+    from?: string;
+    type?: string;
+    value?: string;
+  };
+  AuthStack_CountryScreen: {
+    from: string;
   };
 };
 
@@ -60,8 +70,8 @@ const AppStack: React.FC<Props> = ({navigation, route}) => {
         options={{headerShown: false, animation: 'slide_from_bottom'}}
       />
       <Stack.Screen
-        name="AuthStack"
-        component={AuthStack}
+        name="AuthStack_OTPScreen"
+        component={AuthStack_OTPScreen}
         options={{headerShown: false}}
       />
     </Stack.Navigator>

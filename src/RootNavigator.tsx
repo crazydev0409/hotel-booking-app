@@ -4,7 +4,9 @@ import AppStack from './navigation/AppStack';
 import Loading from './components/Loading';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 export type RootStackParamList = {
-  AuthStack: undefined;
+  AuthStack: {
+    screen?: string;
+  };
   AppStack: undefined;
 };
 const Stack = createNativeStackNavigator<RootStackParamList>();

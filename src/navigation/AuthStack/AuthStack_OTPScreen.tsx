@@ -1,115 +1,155 @@
 import React, {useEffect, useState} from 'react';
-import {createStackNavigator} from '@react-navigation/stack';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {AuthStackParamList} from '.';
-import {View, Text, Pressable, TextInput, TouchableOpacity} from 'react-native';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  TextInput,
+  KeyboardAvoidingView,
+  Keyboard,
+  Image,
+} from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import tw from '../../../tailwindcss';
-import {FirebaseAuthTypes} from '@react-native-firebase/auth';
-import {http} from '../../helpers/http';
+import {SvgUri} from 'react-native-svg';
 import {useAtom} from 'jotai';
 import {userAtom} from '../../store';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import countries from '../../lib/countryCode';
+import {http} from '../../helpers/http';
+import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 
-type Props = NativeStackScreenProps<AuthStackParamList, 'AuthStack_OTPScreen'>;
+type Props = NativeStackScreenProps<
+  AuthStackParamList,
+  'AuthStack_SigninScreen'
+>;
 
-const AuthStack_OTPScreen: React.FC<Props> = ({navigation, route}) => {
+const AuthStack_SigninScreen: React.FC<Props> = ({navigation, route}) => {
   const [user, setUser] = useAtom(userAtom);
-  const [code, setCode] = useState('');
-  const [confirmResult, setConfirmResult] =
-    useState<FirebaseAuthTypes.ConfirmationResult>(null);
+  const [phone, setPhone] = useState('');
+  const [countryCode, setCountryCode] = useState('US');
+  const [password, setPassword] = useState('');
+  const [passwordFocus, setPasswordFocus] = useState(false);
+  const [passwordRequired, setPasswordRequired] = useState(false);
+  const countryNumber = countries.find(
+    country => country.code === countryCode,
+  ).dial_code;
 
   useEffect(() => {
-    if (route.params?.confirmResult) {
-      setConfirmResult(route.params.confirmResult);
-    }
-  }, [route.params]);
+    const showListener = Keyboard.addListener('keyboardDidShow', () => {
+      setPasswordFocus(true);
+    });
+    const hideListener = Keyboard.addListener('keyboardDidHide', () => {
+      setPasswordFocus(false);
+    });
+    return () => {
+      showListener.remove();
+      hideListener.remove();
+    };
+  }, []);
 
-  const onPressConfirmCode = () => {
-    confirmResult
-      .confirm(code)
-      .then(confirmResponse => {
-        if (route.params.from === 'sign_up') {
-          const data = {
-            phone: route.params.phoneNumber,
-            country: route.params.countryCode,
-          };
-          http.post('/user/signup', data).then(res => {
-            console.log({mesaage: res.data.message});
-            if (res.data.message === 'User already exists') {
-              navigation.navigate('AuthStack_SigninScreen', {
-                countryCode: route.params.countryCode,
-                passwordRequired: Boolean(res.data.data.password),
-              });
-            } else {
-              navigation.navigate('AppStack', {
-                screen: 'AppStack_ProfileScreen',
-              });
-            }
-            setUser(res.data.data);
-          });
-        } else if (route.params.from === 'profile') {
-          const data = {
-            type: route.params.type,
-            value: route.params.value,
-          };
-          http
-            .patch(`/user/update/${user._id}`, data)
-            .then(response => {
-              if (response.data.message === 'Phone number already exists') {
-                alert('Phone number already exists');
-              } else {
-                setUser(response.data.data);
-              }
-              navigation.goBack();
-            })
-            .catch(error => {
-              console.log({error});
-            });
-        }
-      })
-      .catch(error => {
-        alert(error.message);
-      });
+  useEffect(() => {
+    setPasswordRequired(route.params?.passwordRequired);
+    // setCountryCode(route.params?.countryCode);
+  }, [route.params]);
+  const onPressCountry = () => {
+    navigation.navigate('AuthStack_CountryScreen', {
+      from: 'sign_in',
+    });
   };
+
+  const onPressSignIn = () => {
+    if (phone.length === 0) {
+      alert('Please Enter Phone Number');
+      return;
+    }
+    if (passwordRequired && password.length === 0) {
+      alert('Please Enter Password');
+      return;
+    }
+    const data = {
+      phone: `${countryNumber}${phone}`,
+      password,
+    };
+    http.post('/user/login', data).then(res => {
+      if (res.data.message === 'User does not exist') {
+        alert('User does not exist');
+      } else if (res.data.message === 'Password does not match') {
+        alert('Password does not match');
+      } else {
+        setUser(res.data.data);
+        navigation.navigate('AppStack', {screen: 'AppStack_HomePageScreen'});
+      }
+    });
+  };
+
   return (
-    <LinearGradient
-      colors={['#FFF', '#1BF2DD']}
-      start={{x: 0, y: 0}}
-      end={{x: 1, y: 1}}
-      style={tw`flex-1 relative`}>
-      <Text
-        style={tw`mt-50 mb-10 self-stretch text-center text-[32px] font-normal text-black font-medium font-abril`}>
-        Verification Code
-      </Text>
-      <View style={tw`flex-row w-full justify-center`}>
-        <View
-          style={tw`flex-row items-center h-15 w-3/4 bg-white rounded-lg mt-10`}>
-          <TextInput
-            style={tw`bg-white rounded-lg flex-1 font-dm font-bold text-[18px] text-center`}
-            value={code}
-            placeholder="Code"
-            onChangeText={setCode}
-          />
-        </View>
-      </View>
-      <Text style={tw`text-center mt-3 text-black text-xs font-bold`}>
-        Please enter your code here to verify
-      </Text>
-      <View style={tw`absolute bottom-0 w-full`}>
-        <TouchableOpacity
-          activeOpacity={0.5}
-          onPress={onPressConfirmCode}
-          style={tw`h-20 shrink-0 rounded-t-5 bg-white flex-row justify-end items-center`}>
-          <View style={tw`py-2.5 px-8 rounded-[13px] bg-[#FF5C00] mr-5`}>
-            <Text style={tw`text-white text-[18px] font-dm font-bold`}>
-              Done
+    <KeyboardAwareScrollView
+      contentContainerStyle={tw`flex-grow`}
+      resetScrollToCoords={{x: 0, y: 0}}
+      scrollEnabled={true}>
+      <LinearGradient
+        colors={['#FFF', '#1BF2DD']}
+        start={{x: 0, y: 0}}
+        end={{x: 1, y: 1}}
+        style={tw`flex-1 relative`}>
+        <Text
+          style={tw`mt-50 mb-10 self-stretch text-center text-[32px] font-normal text-black font-medium font-abril`}>
+          Welcome
+        </Text>
+        <View style={tw`flex flex-col w-full items-center`}>
+          <View
+            style={tw`flex-row items-center h-15 w-3/4 bg-white rounded-lg mt-10`}>
+            <TouchableOpacity onPress={onPressCountry} activeOpacity={0.5}>
+              <Image
+                width={60}
+                height={30}
+                source={{
+                  uri: `https://flagcdn.com/w320/${countryCode.toLowerCase()}.png`,
+                }}
+                style={tw`mx-2.5`}
+              />
+            </TouchableOpacity>
+            <Text style={tw`text-black text-[18px] font-dm font-bold`}>
+              {countryNumber}
             </Text>
+            <TextInput
+              style={tw`bg-white rounded-lg flex-1 font-dm font-bold text-[18px] mt-0.7`}
+              value={phone}
+              placeholder="Phone Number?"
+              onChangeText={setPhone}
+            />
           </View>
-        </TouchableOpacity>
-      </View>
-    </LinearGradient>
+          {passwordRequired && (
+            <View
+              style={tw`flex-row items-center h-15 w-3/4 bg-white rounded-lg mt-4.5`}>
+              <TextInput
+                style={tw`bg-white rounded-lg flex-1 font-dm font-bold text-[18px] text-center`}
+                secureTextEntry={true}
+                value={password}
+                placeholder="Password"
+                onChangeText={setPassword}
+              />
+            </View>
+          )}
+        </View>
+        {!passwordFocus && (
+          <View style={tw`absolute bottom-0 w-full`}>
+            <TouchableOpacity
+              activeOpacity={0.5}
+              onPress={onPressSignIn}
+              style={tw`h-20 rounded-t-5 bg-white flex-row justify-end items-center`}>
+              <View style={tw`py-2.5 px-8 rounded-[13px] bg-[#FF5C00] mr-5`}>
+                <Text style={tw`text-white text-[18px] font-dm font-bold`}>
+                  Done
+                </Text>
+              </View>
+            </TouchableOpacity>
+          </View>
+        )}
+      </LinearGradient>
+    </KeyboardAwareScrollView>
   );
 };
 
-export default AuthStack_OTPScreen;
+export default AuthStack_SigninScreen;

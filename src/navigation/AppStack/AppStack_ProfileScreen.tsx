@@ -123,14 +123,11 @@ const AppStack_ProfileScreen: React.FC<Props> = ({navigation, route}) => {
         type === 'phoneNumber' ? phoneNumber : user.phoneNumber,
       )
       .then(confirmResult => {
-        navigation.navigate('AuthStack', {
-          screen: 'AuthStack_OTPScreen',
-          params: {
-            from: 'profile',
-            type,
-            value: values[type],
-            confirmResult,
-          },
+        return navigation.navigate('AuthStack_OTPScreen', {
+          from: 'profile',
+          type,
+          value: values[type],
+          confirmResult,
         });
       })
       .catch(error => {
@@ -141,9 +138,8 @@ const AppStack_ProfileScreen: React.FC<Props> = ({navigation, route}) => {
     navigation.navigate('AppStack_HomePageScreen');
   };
   const onPressCountry = () => {
-    navigation.navigate('AuthStack', {
-      screen: 'AuthStack_CountryScreen',
-      params: {from: 'profile'},
+    navigation.navigate('AuthStack_CountryScreen', {
+      from: 'profile',
     });
   };
   return (
