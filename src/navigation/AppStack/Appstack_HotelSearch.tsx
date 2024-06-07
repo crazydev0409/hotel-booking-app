@@ -31,7 +31,7 @@ const ImageCard: React.FC = () => {
     <View>
       <View style={tw`w-25 h-25 rounded-[13px]`}>
         <Image
-          source={require('../../../assets/images/2200-1000px-banner-Muna-1310x595 13.png')}
+          source={require('../../../assets/images/hotel1.png')}
           style={tw`w-full h-full rounded-[13px]`}
         />
       </View>

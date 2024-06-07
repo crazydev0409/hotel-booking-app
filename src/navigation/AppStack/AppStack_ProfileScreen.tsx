@@ -123,12 +123,13 @@ const AppStack_ProfileScreen: React.FC<Props> = ({navigation, route}) => {
         type === 'phoneNumber' ? phoneNumber : user.phoneNumber,
       )
       .then(confirmResult => {
-        return navigation.navigate('AuthStack_OTPScreen', {
+        navigation.navigate('AuthStack_OTPScreen', {
           from: 'profile',
           type,
           value: values[type],
           confirmResult,
         });
+        setPassword('');
       })
       .catch(error => {
         alert(error.message);

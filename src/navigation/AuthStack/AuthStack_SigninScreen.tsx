@@ -18,6 +18,7 @@ import {userAtom} from '../../store';
 import countries from '../../lib/countryCode';
 import {http} from '../../helpers/http';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
+import Loading from '../../components/Loading';
 
 type Props = NativeStackScreenProps<
   AuthStackParamList,
@@ -31,6 +32,7 @@ const AuthStack_SigninScreen: React.FC<Props> = ({navigation, route}) => {
   const [password, setPassword] = useState('');
   const [passwordFocus, setPasswordFocus] = useState(false);
   const [passwordRequired, setPasswordRequired] = useState(false);
+  const [loading, setLoading] = useState(false);
   const countryNumber = countries.find(
     country => country.code === countryCode,
   ).dial_code;
@@ -71,7 +73,9 @@ const AuthStack_SigninScreen: React.FC<Props> = ({navigation, route}) => {
       phone: `${countryNumber}${phone}`,
       password,
     };
+    setLoading(true);
     http.post('/user/login', data).then(res => {
+      setLoading(false);
       if (res.data.message === 'User does not exist') {
         alert('User does not exist');
       } else if (res.data.message === 'Password does not match') {
@@ -83,6 +87,7 @@ const AuthStack_SigninScreen: React.FC<Props> = ({navigation, route}) => {
     });
   };
 
+  if (loading) return <Loading />;
   return (
     <KeyboardAwareScrollView
       contentContainerStyle={tw`flex-grow`}
@@ -125,7 +130,7 @@ const AuthStack_SigninScreen: React.FC<Props> = ({navigation, route}) => {
               style={tw`flex-row items-center h-15 w-3/4 bg-white rounded-lg mt-4.5`}>
               <TextInput
                 style={tw`bg-white rounded-lg flex-1 font-dm font-bold text-[18px] text-center`}
-                secureTextEntry={password.length === 0 && !passwordFocus}
+                secureTextEntry={password.length > 0 ? true : false}
                 value={password}
                 placeholder="Password"
                 onChangeText={setPassword}

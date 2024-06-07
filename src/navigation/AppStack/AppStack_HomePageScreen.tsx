@@ -19,6 +19,7 @@ import MapView, {PROVIDER_GOOGLE, Marker} from 'react-native-maps';
 import tw from '../../../tailwindcss';
 import LinearGradient from 'react-native-linear-gradient';
 import {Cancel, Coffee, Swimming, ToBelow} from '../../lib/images';
+import {hotelLists} from '../../lib/listTemp';
 // import Animated from 'react-native-reanimated';
 type Props = NativeStackScreenProps<
   AppStackParamList,
@@ -31,11 +32,15 @@ interface ICardProps {
     'AppStack_HomePageScreen'
   >;
   setCardHeight: React.Dispatch<React.SetStateAction<number>>;
+  item: any;
 }
 const windowsHeight = Dimensions.get('window').height;
-const HotelCard: React.FC = ({navigation, setCardHeight}: ICardProps) => {
+const windowsWidth = Dimensions.get('window').width;
+const HotelCard: React.FC = ({navigation, setCardHeight, item}: ICardProps) => {
   const onPressToDetail = () => {
-    navigation.navigate('AppStack_DetailScreen');
+    navigation.navigate('AppStack_DetailScreen', {
+      item,
+    });
   };
   return (
     <TouchableOpacity onPress={onPressToDetail} activeOpacity={0.5}>
@@ -45,15 +50,15 @@ const HotelCard: React.FC = ({navigation, setCardHeight}: ICardProps) => {
         }}
         style={tw`m-3 rounded-[13px] border-[1px] border-[#0A0A0A] bg-black flex-row`}>
         <Image
-          source={require('../../../assets/images/2200-1000px-banner-Muna-1310x595 15.png')}
-          style={tw`rounded-[13px] mr-2.5`}
+          source={item.images[0]}
+          style={tw`rounded-[13px] mr-2.5 w-[180px] h-[180px]`}
           width={180}
           height={180}
         />
-        <View style={tw`m-3`}>
+        <View style={tw`m-3 flex-1`}>
           <Text
-            style={tw`h-13 w-40 text-white font-dm font-bold text-[14px] flex-shrink mb-2 leading-[18px]`}>
-            Hampton Inn & Suites Newburgh Stewart Airport
+            style={tw`h-13 text-white font-dm font-bold text-[14px] flex-shrink mb-2 leading-[18px]`}>
+            {item.title}
           </Text>
           <View style={tw`flex-row mb-1.5`}>
             <Image source={Coffee} style={tw`h-3 w-3 `} />
@@ -72,23 +77,23 @@ const HotelCard: React.FC = ({navigation, setCardHeight}: ICardProps) => {
             </Text>
             <Text
               style={tw`text-black text-center font-dm text-[5px] font-bold leading-[6px]`}>
-              Ratings
+              {item.rating}
             </Text>
           </View>
           <View style={tw`flex-col items-end`}>
             <View
               style={tw`w-8.5 h-4 rounded-[3px] bg-[#8B2500] flex-row justify-center items-center mb-2`}>
               <Text style={tw`text-white font-dm text-[8px] font-bold`}>
-                1 Left
+                {item.availables} Left
               </Text>
             </View>
             <View style={tw`flex-row gap-3`}>
               <Text
                 style={tw`text-white font-dm text-[18px] line-through font-bold`}>
-                $143
+                ${item.oldPrice}
               </Text>
               <Text style={tw`text-[#FF5C00] font-dm text-[18px] font-bold`}>
-                $113
+                ${item.newPrice}
               </Text>
             </View>
             <Text style={tw`text-white font-dm text-[5px] font-bold`}>
@@ -106,7 +111,6 @@ const AppStack_HomePageScreen: React.FC<Props> = ({navigation, route}) => {
   const mousePositionRef = useRef(0);
   const directionRef = useRef(false);
   const gestureDyRef = useRef(0);
-  const [itemCount, setItemCount] = useState(7);
   const [region, setRegion] = useState({
     latitude: 37.78825,
     longitude: -122.4324,
@@ -124,12 +128,7 @@ const AppStack_HomePageScreen: React.FC<Props> = ({navigation, route}) => {
   const calculateCurrentPoint = gestureState =>
     mousePositionRef.current + gestureState.dy;
 
-  const calculateLimitPullingHeight = cardsPullingHeight =>
-    cardsPullingHeight + 60 > windowsHeight
-      ? 60
-      : windowsHeight - cardsPullingHeight;
-
-  const calculateCardsPullingHeight = () => (cardHeight + 26) * itemCount + 48;
+  const calculateLimitPullingHeight = () => 60;
 
   const setTopSheetPosition = (value, callback = () => {}) => {
     Animated.spring(topSheetPosition, {
@@ -152,9 +151,7 @@ const AppStack_HomePageScreen: React.FC<Props> = ({navigation, route}) => {
       }
 
       const currentPoint = calculateCurrentPoint(gestureState);
-      const cardsPullingHeight = calculateCardsPullingHeight();
-      const limitPullingHeight =
-        calculateLimitPullingHeight(cardsPullingHeight);
+      const limitPullingHeight = calculateLimitPullingHeight();
 
       topListBackgroundOpactiy.setValue(
         (windowsHeight - currentPoint) / (windowsHeight - 60),
@@ -169,9 +166,7 @@ const AppStack_HomePageScreen: React.FC<Props> = ({navigation, route}) => {
     },
     onPanResponderRelease: (event, gestureState) => {
       const currentPoint = calculateCurrentPoint(gestureState);
-      const cardsPullingHeight = calculateCardsPullingHeight();
-      const limitPullingHeight =
-        calculateLimitPullingHeight(cardsPullingHeight);
+      const limitPullingHeight = calculateLimitPullingHeight();
 
       topListBackgroundOpactiy.setValue(
         (windowsHeight - currentPoint) / (windowsHeight - 60),
@@ -296,7 +291,7 @@ const AppStack_HomePageScreen: React.FC<Props> = ({navigation, route}) => {
           colors={['#FFF', '#1E2761']}
           start={{x: 0, y: 0}}
           end={{x: 1, y: 1}}
-          style={tw`rounded-t-5 flex-col items-center`}>
+          style={tw`rounded-t-5 flex-col items-center h-full`}>
           <View
             style={tw`min-h-[50px] w-full flex items-center justify-center`}
             {...panResponder.panHandlers}>
@@ -309,13 +304,15 @@ const AppStack_HomePageScreen: React.FC<Props> = ({navigation, route}) => {
           )}
 
           <FlatList
-            data={Array.from({length: itemCount}, (_, index) => index + 1)}
+            contentContainerStyle={tw`w-${windowsWidth / 4}`}
+            data={hotelLists}
             keyExtractor={item => item.toString()}
             style={{maxHeight: windowsHeight - 180}}
-            renderItem={() => (
+            renderItem={({item}) => (
               <HotelCard
                 navigation={navigation}
                 setCardHeight={setCardHeight}
+                item={item}
               />
             )}
           />

@@ -19,7 +19,9 @@ export type AppStackParamList = {
       longitude: number;
     };
   };
-  AppStack_DetailScreen: undefined;
+  AppStack_DetailScreen: {
+    item: any;
+  };
   AppStack_HotelSearch: undefined;
   AppStack_LocationSearch: undefined;
   AppStack_PriceFilterScreen: undefined;

@@ -19,7 +19,7 @@ const RootNavigator = () => {
   }
   return (
     <Stack.Navigator
-      initialRouteName="AuthStack"
+      initialRouteName="AppStack"
       screenOptions={{headerShown: false}}>
       <Stack.Screen name="AuthStack" component={AuthStack} />
       <Stack.Screen name="AppStack" component={AppStack} />
