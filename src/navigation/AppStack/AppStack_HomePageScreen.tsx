@@ -9,6 +9,7 @@ import {
   Dimensions,
   FlatList,
   TouchableOpacity,
+  BackHandler,
 } from 'react-native';
 import {
   NativeStackNavigationProp,
@@ -19,7 +20,9 @@ import MapView, {PROVIDER_GOOGLE, Marker} from 'react-native-maps';
 import tw from '../../../tailwindcss';
 import LinearGradient from 'react-native-linear-gradient';
 import {Cancel, Coffee, Swimming, ToBelow} from '../../lib/images';
-import {hotelLists} from '../../lib/listTemp';
+// import {hotelLists} from '../../lib/listTemp';
+import {http, uploadPath} from '../../helpers/http';
+import Loading from '../../components/Loading';
 // import Animated from 'react-native-reanimated';
 type Props = NativeStackScreenProps<
   AppStackParamList,
@@ -31,26 +34,24 @@ interface ICardProps {
     AppStackParamList,
     'AppStack_HomePageScreen'
   >;
-  setCardHeight: React.Dispatch<React.SetStateAction<number>>;
   item: any;
 }
 const windowsHeight = Dimensions.get('window').height;
 const windowsWidth = Dimensions.get('window').width;
-const HotelCard: React.FC = ({navigation, setCardHeight, item}: ICardProps) => {
+const HotelCard: React.FC = ({navigation, item}: ICardProps) => {
   const onPressToDetail = () => {
-    navigation.navigate('AppStack_DetailScreen', {
-      item,
-    });
+    if (item.isHotel) {
+      navigation.navigate('AppStack_HotelDetailScreen', {item});
+    } else {
+      navigation.navigate('AppStack_SpotDetailScreen', {item});
+    }
   };
   return (
     <TouchableOpacity onPress={onPressToDetail} activeOpacity={0.5}>
       <View
-        onLayout={event => {
-          setCardHeight(event.nativeEvent.layout.height);
-        }}
         style={tw`m-3 rounded-[13px] border-[1px] border-[#0A0A0A] bg-black flex-row`}>
         <Image
-          source={item.images[0]}
+          source={{uri: uploadPath + item.images[0]}}
           style={tw`rounded-[13px] mr-2.5 w-[180px] h-[180px]`}
           width={180}
           height={180}
@@ -58,7 +59,7 @@ const HotelCard: React.FC = ({navigation, setCardHeight, item}: ICardProps) => {
         <View style={tw`m-3 flex-1`}>
           <Text
             style={tw`h-13 text-white font-dm font-bold text-[14px] flex-shrink mb-2 leading-[18px]`}>
-            {item.title}
+            {item.name}
           </Text>
           <View style={tw`flex-row mb-1.5`}>
             <Image source={Coffee} style={tw`h-3 w-3 `} />
@@ -77,23 +78,23 @@ const HotelCard: React.FC = ({navigation, setCardHeight, item}: ICardProps) => {
             </Text>
             <Text
               style={tw`text-black text-center font-dm text-[5px] font-bold leading-[6px]`}>
-              {item.rating}
+              rating
             </Text>
           </View>
           <View style={tw`flex-col items-end`}>
             <View
               style={tw`w-8.5 h-4 rounded-[3px] bg-[#8B2500] flex-row justify-center items-center mb-2`}>
               <Text style={tw`text-white font-dm text-[8px] font-bold`}>
-                {item.availables} Left
+                {item.minimumRooms} Left
               </Text>
             </View>
             <View style={tw`flex-row gap-3`}>
               <Text
                 style={tw`text-white font-dm text-[18px] line-through font-bold`}>
-                ${item.oldPrice}
+                ${item.minimumWasPrice}
               </Text>
               <Text style={tw`text-[#FF5C00] font-dm text-[18px] font-bold`}>
-                ${item.newPrice}
+                ${item.minimumPrice}
               </Text>
             </View>
             <Text style={tw`text-white font-dm text-[5px] font-bold`}>
@@ -107,7 +108,9 @@ const HotelCard: React.FC = ({navigation, setCardHeight, item}: ICardProps) => {
 };
 const AppStack_HomePageScreen: React.FC<Props> = ({navigation, route}) => {
   const [showText, setShowText] = useState(true);
-  const [cardHeight, setCardHeight] = useState(0);
+  const [hotelLists, setHotelLists] = useState([]);
+  const [spotLists, setSpotLists] = useState([]);
+  const [loading, setLoading] = useState(false);
   const mousePositionRef = useRef(0);
   const directionRef = useRef(false);
   const gestureDyRef = useRef(0);
@@ -190,6 +193,53 @@ const AppStack_HomePageScreen: React.FC<Props> = ({navigation, route}) => {
       }
     },
   });
+
+  const getAllHotels = () => {
+    setLoading(true);
+    http
+      .get('/user/all_hotels')
+      .then(res => {
+        setLoading(false);
+        setHotelLists(
+          res.data.data.map((item: any) => ({
+            ...item,
+            isHotel: true,
+          })),
+        );
+      })
+      .catch(err => {
+        setLoading(false);
+        console.log(err);
+      });
+  };
+
+  const getAllSpots = () => {
+    http
+      .get('/user/all_spots')
+      .then(res => {
+        setSpotLists(
+          res.data.data.map((item: any) => ({
+            ...item,
+            isHotel: false,
+          })),
+        );
+      })
+      .catch(err => {
+        console.log(err);
+      });
+  };
+  useEffect(() => {
+    getAllSpots();
+    getAllHotels();
+    BackHandler.addEventListener('hardwareBackPress', () => {
+      return true;
+    });
+    return () => {
+      BackHandler.removeEventListener('hardwareBackPress', () => {
+        return true;
+      });
+    };
+  }, []);
   useEffect(() => {
     if (route.params?.searchResult) {
       setRegion({
@@ -200,6 +250,8 @@ const AppStack_HomePageScreen: React.FC<Props> = ({navigation, route}) => {
       });
     }
   }, [route.params?.searchResult]);
+
+  if (loading) return <Loading />;
   return (
     <View style={tw`flex-1 relative`}>
       <Animated.View
@@ -265,21 +317,46 @@ const AppStack_HomePageScreen: React.FC<Props> = ({navigation, route}) => {
         style={tw`h-full w-full`}
         provider={PROVIDER_GOOGLE}
         region={region}>
-        <Marker
-          coordinate={{
-            latitude: 37.78825,
-            longitude: -122.4324,
-          }}
-          title="xxx hotel"
-          description="This is a hotel">
-          <View
-            style={tw`w-7 h-4 rounded-[3px] bg-[#1E2761] flex-row justify-center items-center`}>
-            <Text
-              style={tw`text-white text-[8px] text-center font-dm font-bold`}>
-              $100
-            </Text>
-          </View>
-        </Marker>
+        {hotelLists.length > 0 &&
+          hotelLists.map((item, index) => (
+            <Marker
+              key={index}
+              coordinate={{
+                latitude: item.position.lat,
+                longitude: item.position.lng,
+              }}
+              title={item.name}
+              description={item.description}>
+              <View
+                style={tw`w-7 h-4 rounded-[3px] bg-[#1E2761] flex-row justify-center items-center`}>
+                <Text
+                  style={tw`text-white text-[8px] text-center font-dm font-bold`}>
+                  ${item.minimumPrice}
+                </Text>
+              </View>
+            </Marker>
+          ))}
+        {spotLists.length > 0 &&
+          spotLists.map((item, index) => (
+            <Marker
+              key={index}
+              coordinate={{
+                latitude: item.position.lat,
+                longitude: item.position.lng,
+              }}
+              title={item.name}
+              description={item.description}>
+              <View
+                style={tw`w-[30px] h-[30px] rounded-full border-[1px] border-[#1E2761]`}>
+                <Image
+                  source={{uri: uploadPath + item.images[0]}}
+                  style={tw`w-full h-full rounded-full`}
+                  width={30}
+                  height={30}
+                />
+              </View>
+            </Marker>
+          ))}
       </MapView>
       <Animated.View
         hitSlop={{top: 0, bottom: 0, left: 0, right: 0}}
@@ -305,15 +382,11 @@ const AppStack_HomePageScreen: React.FC<Props> = ({navigation, route}) => {
 
           <FlatList
             contentContainerStyle={tw`w-${windowsWidth / 4}`}
-            data={hotelLists}
-            keyExtractor={item => item.toString()}
+            data={[...hotelLists, ...spotLists]}
+            keyExtractor={item => item._id.toString()}
             style={{maxHeight: windowsHeight - 180}}
             renderItem={({item}) => (
-              <HotelCard
-                navigation={navigation}
-                setCardHeight={setCardHeight}
-                item={item}
-              />
+              <HotelCard navigation={navigation} item={item} />
             )}
           />
           <View

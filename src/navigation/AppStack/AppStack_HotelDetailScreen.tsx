@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -22,12 +22,14 @@ import {
   Cross,
 } from '../../lib/images';
 import GoBackIcon from '../../components/GoBackIcon';
+import {http, uploadPath} from '../../helpers/http';
 
-type Props = NativeStackScreenProps<AppStackParamList, 'AppStack_DetailScreen'>;
+type Props = NativeStackScreenProps<
+  AppStackParamList,
+  'AppStack_HotelDetailScreen'
+>;
 type IDetailCardProps = {
-  title: string;
   backgroundColor: string;
-  type: number;
   item: any;
   selected: boolean;
 };
@@ -36,7 +38,10 @@ const ImageSwiper = ({images}) => (
   <FlatList
     data={images}
     renderItem={({item}) => (
-      <Image source={item} style={tw`w-[${width}px] h-96`} />
+      <Image
+        source={{uri: uploadPath + item}}
+        style={tw`w-[${width}px] h-96`}
+      />
     )}
     keyExtractor={item => item.toString()}
     horizontal
@@ -44,28 +49,30 @@ const ImageSwiper = ({images}) => (
     showsHorizontalScrollIndicator={false}
   />
 );
-const DetailCard = ({
-  title,
-  backgroundColor,
-  type,
-  item,
-  selected,
-}: IDetailCardProps) => {
+const DetailCard = ({backgroundColor, item, selected}: IDetailCardProps) => {
   return (
     <View
       style={[
         tw`rounded-[13px] w-[${width / 2}px] ${backgroundColor} border-2`,
         selected ? tw`border-[#FF5C00]` : tw`border-transparent`,
       ]}>
-      <Image
-        source={type === 0 ? item.images[1] : item.images[2]}
-        height={180}
-        style={tw`rounded-[13px] mb-2 w-full h-[180px]`}
+      <FlatList
+        data={item.images}
+        renderItem={({item}) => (
+          <Image
+            source={{uri: uploadPath + item}}
+            height={180}
+            style={tw`rounded-[13px] mb-2 w-[${width / 2}px] h-[180px]`}
+          />
+        )}
+        keyExtractor={item => item.toString()}
+        horizontal
+        showsHorizontalScrollIndicator={false}
       />
       <View style={tw`p-2`}>
         <Text
           style={tw`text-white font-dm text-[12px] font-bold text-left mb-2`}>
-          {title}
+          {item.name}
         </Text>
         <View style={tw`flex-row items-end w-full justify-between mb-1`}>
           <View>
@@ -88,7 +95,7 @@ const DetailCard = ({
             <View style={tw`flex-row items-center`}>
               <Image source={Swimming} style={tw`h-3 w-3 mr-1`} />
               <Text style={tw`text-white font-dm text-[5px] font-bold`}>
-                Free Cancellation Within 24 Hours
+                {item.cancellationPolicy}
               </Text>
             </View>
           </View>
@@ -96,53 +103,50 @@ const DetailCard = ({
             <View
               style={tw`w-8.5 h-4 rounded-[3px] bg-[#8B2500] flex-row justify-center items-center`}>
               <Text style={tw`text-white font-dm text-[8px] font-bold`}>
-                {item.availables} Left
+                {item.roomAvailable} Left
               </Text>
             </View>
           </View>
         </View>
         <View style={tw`flex-row gap-3 justify-end`}>
-          {type === 0 && (
-            <Text
-              style={tw`text-white font-dm text-[18px] line-through font-bold`}>
-              ${item.oldPrice}
-            </Text>
-          )}
+          <Text
+            style={tw`text-white font-dm text-[18px] line-through font-bold`}>
+            ${item.wasPrice}
+          </Text>
           <Text style={tw`text-[#FF5C00] font-dm text-[18px] font-bold`}>
-            ${item.newPrice}
+            ${item.price}
           </Text>
         </View>
       </View>
     </View>
   );
 };
-const AppStack_DetailScreen: React.FC<Props> = ({navigation, route}) => {
-  const defaultRooms = [
-    {
-      title: 'Infinity Sea View',
-      backgroundColor: 'bg-black',
-      type: 0,
-      item: route.params.item,
-      selected: false,
-    },
-    {
-      title: 'SuperDeluxe',
-      backgroundColor: 'bg-[#1E2761]',
-      type: 1,
-      item: route.params.item,
-      selected: false,
-    },
-    {
-      title: 'Infinity Sea View',
-      backgroundColor: 'bg-black',
-      type: 0,
-      item: route.params.item,
-      selected: false,
-    },
-  ];
-  const [rooms, setRooms] = React.useState(defaultRooms);
+const AppStack_HotelDetailScreen: React.FC<Props> = ({navigation, route}) => {
+  const [rooms, setRooms] = useState([]);
   const onPressReserve = () => {
     // navigation.navigate('AppStack_ReservationScreen');
+  };
+
+  useEffect(() => {
+    getRooms();
+  }, [route.params.item._id]);
+
+  const getRooms = () => {
+    http
+      .get(`/user/get_rooms/${route.params.item._id}`)
+      .then(res => {
+        const data = res.data.data.map((room, index) => {
+          return {
+            ...room,
+            backgroundColor: index % 2 === 0 ? 'bg-black' : 'bg-[#1E2761]',
+            selected: false,
+          };
+        });
+        setRooms(data);
+      })
+      .catch(err => {
+        console.log(err);
+      });
   };
   return (
     <LinearGradient
@@ -170,13 +174,13 @@ const AppStack_DetailScreen: React.FC<Props> = ({navigation, route}) => {
         </View>
         <View style={tw`px-2`}>
           <Text style={tw`text-black font-abril text-[18px] font-bold py-2`}>
-            {route.params.item.title}
+            {route.params.item.name}
           </Text>
           <View style={tw`flex-row gap-2 mb-1`}>
             <View style={tw`w-7 h-4 rounded-[3px] bg-[#1BF28B] mb-0.5`}>
               <Text
                 style={tw`text-black text-center font-dm text-[8px] font-bold leading-[9px]`}>
-                {route.params.item.rating}
+                {9.5}
               </Text>
               <Text
                 style={tw`text-black text-center font-dm text-[5px] font-bold leading-[6px]`}>
@@ -186,7 +190,7 @@ const AppStack_DetailScreen: React.FC<Props> = ({navigation, route}) => {
             <View style={tw`w-7 h-4 rounded-[3px] bg-white mb-0.5`}>
               <Text
                 style={tw`text-black text-center font-dm text-[8px] font-bold leading-[9px]`}>
-                3
+                {route.params.item.type[0]}
               </Text>
               <Text
                 style={tw`text-black text-center font-dm text-[5px] font-bold leading-[6px]`}>
@@ -201,12 +205,22 @@ const AppStack_DetailScreen: React.FC<Props> = ({navigation, route}) => {
             Amenities
           </Text>
           <View style={tw`flex-row mb-1.5 items-center`}>
-            <Image source={CoffeeBlack} style={tw`h-3 w-3 mr-1`} />
+            {route.params.item.amenities.map(
+              (amenity: string, index: number) => (
+                <View key={index} style={tw`flex-row items-center mr-3`}>
+                  <Image source={CoffeeBlack} style={tw`h-3 w-3 mr-1`} />
+                  <Text style={tw`text-black font-dm text-[5px] mr-3`}>
+                    {amenity}
+                  </Text>
+                </View>
+              ),
+            )}
+            {/* <Image source={CoffeeBlack} style={tw`h-3 w-3 mr-1`} />
             <Text style={tw`text-black font-dm text-[5px] mr-3`}>
               Free Breakfast
             </Text>
             <Image source={SwimmingBlack} style={tw`h-3 w-3 mr-1`} />
-            <Text style={tw`text-black font-dm text-[5px]`}>Swimming Pool</Text>
+            <Text style={tw`text-black font-dm text-[5px]`}>Swimming Pool</Text> */}
           </View>
           <Text style={tw`text-black font-dm text-[18px] font-bold mb-1.5`}>
             Policies
@@ -215,51 +229,68 @@ const AppStack_DetailScreen: React.FC<Props> = ({navigation, route}) => {
             Check In
           </Text>
           <View style={tw`ml-6`}>
-            <Text style={tw`text-black font-dm text-[8px] font-bold mb-1.5`}>
-              Check In Starts At 3:PM
-            </Text>
-            <Text style={tw`text-black font-dm text-[8px] font-bold mb-1.5`}>
-              Minimum Check In Age 21
-            </Text>
-            <Text style={tw`text-black font-dm text-[8px] font-bold mb-1.5`}>
-              Photo Id Needed For Check In
-            </Text>
+            {route.params.item.checkIn.map((checkIn: string, index: number) => (
+              <Text
+                key={index}
+                style={tw`text-black font-dm text-[8px] font-bold mb-1.5`}>
+                {checkIn}
+              </Text>
+            ))}
           </View>
           <Text style={tw`text-black font-dm text-[10px] font-bold mb-1.5`}>
             Check-Out
           </Text>
+          <View style={tw`ml-6`}>
+            {route.params.item.checkOut.map(
+              (openingDay: string, index: number) => (
+                <Text
+                  key={index}
+                  style={tw`text-black font-dm text-[8px] font-bold mb-1.5`}>
+                  {openingDay}
+                </Text>
+              ),
+            )}
+          </View>
+          <Text style={tw`text-black font-dm text-[10px] font-bold mb-1.5`}>
+            Opening Days
+          </Text>
           <View style={tw`ml-6 mb-5`}>
-            <Text style={tw`text-black font-dm text-[8px] font-bold mb-1.5`}>
-              Check In Starts At 3:PM
-            </Text>
+            {route.params.item.openingDays.map(
+              (checkOut: string, index: number) => (
+                <Text
+                  key={index}
+                  style={tw`text-black font-dm text-[8px] font-bold mb-1.5`}>
+                  {checkOut}
+                </Text>
+              ),
+            )}
           </View>
           <Text style={tw`text-black font-dm text-[18px] font-bold mb-1.5`}>
             Rooms
           </Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
             <View style={tw`gap-3 flex-row mb-4`}>
-              {rooms.map((room, index) => (
-                <TouchableOpacity
-                  key={index}
-                  activeOpacity={0.5}
-                  onPress={() => {
-                    const newRooms = rooms.map((r, i) => {
-                      if (i === index) {
-                        return {...r, selected: true};
-                      }
-                      return {...r, selected: false};
-                    });
-                    setRooms(newRooms);
-                  }}>
-                  <DetailCard
-                    title={room.title}
-                    backgroundColor={room.backgroundColor}
-                    type={room.type}
-                    item={room.item}
-                    selected={room.selected}
-                  />
-                </TouchableOpacity>
-              ))}
+              {rooms.length > 0 &&
+                rooms.map((room, index) => (
+                  <TouchableOpacity
+                    key={index}
+                    activeOpacity={0.5}
+                    onPress={() => {
+                      const newRooms = rooms.map((r, i) => {
+                        if (i === index) {
+                          return {...r, selected: true};
+                        }
+                        return {...r, selected: false};
+                      });
+                      setRooms(newRooms);
+                    }}>
+                    <DetailCard
+                      backgroundColor={room.backgroundColor}
+                      item={room}
+                      selected={room.selected}
+                    />
+                  </TouchableOpacity>
+                ))}
             </View>
           </ScrollView>
         </View>
@@ -290,4 +321,4 @@ const AppStack_DetailScreen: React.FC<Props> = ({navigation, route}) => {
   );
 };
 
-export default AppStack_DetailScreen;
+export default AppStack_HotelDetailScreen;

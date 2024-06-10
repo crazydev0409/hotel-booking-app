@@ -38,21 +38,6 @@ export type AuthStackParamList = {
 type Props = NativeStackScreenProps<RootStackParamList, 'AuthStack'>;
 const Stack = createNativeStackNavigator<AuthStackParamList>();
 const AuthStack: React.FC<Props> = ({navigation, route}) => {
-  useEffect(() => {
-    const checkAuth = async () => {
-      const authStatus = await AsyncStorage.getItem('authStatus');
-      const passwordRequired = await AsyncStorage.getItem('passwordRequired');
-      if (authStatus === 'true') {
-        navigation.navigate('AuthStack', {
-          screen: 'AuthStack_SigninScreen',
-          params: {
-            passwordRequired: Boolean(passwordRequired),
-          },
-        });
-      }
-    };
-    checkAuth();
-  }, []);
   return (
     <Stack.Navigator initialRouteName="AuthStack_SignupScreen">
       <Stack.Screen

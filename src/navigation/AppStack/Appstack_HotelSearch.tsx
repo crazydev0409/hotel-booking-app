@@ -52,7 +52,6 @@ const AppStack_HotelSearch: React.FC<Props> = ({navigation, route}) => {
   const [guests, setGuests] = useState({adults: 0, children: 0, infants: 0});
   const [keyBoardShow, setKeyBoardShow] = useState(false);
   const locationSearchWidth = useRef(new Animated.Value(0)).current;
-  console.log({locationSelected: JSON.stringify(locationSelected)});
   const locationSearchWidthAnim = Animated.timing(locationSearchWidth, {
     toValue: locationFocus ? screenWidth - 50 : 264,
     duration: 200,

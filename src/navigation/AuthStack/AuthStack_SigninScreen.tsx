@@ -52,7 +52,7 @@ const AuthStack_SigninScreen: React.FC<Props> = ({navigation, route}) => {
 
   useEffect(() => {
     setPasswordRequired(route.params?.passwordRequired);
-    // setCountryCode(route.params?.countryCode);
+    setCountryCode(route.params?.countryCode);
   }, [route.params]);
   const onPressCountry = () => {
     navigation.navigate('AuthStack_CountryScreen', {

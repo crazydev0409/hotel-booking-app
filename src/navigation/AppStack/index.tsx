@@ -1,6 +1,6 @@
 import React from 'react';
 import AppStack_HomePageScreen from './AppStack_HomePageScreen';
-import AppStack_DetailScreen from './AppStack_DetailScreen';
+import AppStack_HotelDetailScreen from './AppStack_HotelDetailScreen';
 import AppStack_ProfileScreen from './AppStack_ProfileScreen';
 import {
   NativeStackScreenProps,
@@ -12,6 +12,7 @@ import AppStack_HotelSearch from './Appstack_HotelSearch';
 import AppStack_PriceFilterScreen from './AppStack_PriceFilterScreen';
 import {FirebaseAuthTypes} from '@react-native-firebase/auth';
 import AuthStack_OTPScreen from '../AuthStack/AuthStack_OTPScreen';
+import AppStack_SpotDetailScreen from './AppStack_SpotDetailScreen';
 export type AppStackParamList = {
   AppStack_HomePageScreen?: {
     searchResult: {
@@ -19,7 +20,10 @@ export type AppStackParamList = {
       longitude: number;
     };
   };
-  AppStack_DetailScreen: {
+  AppStack_HotelDetailScreen: {
+    item: any;
+  };
+  AppStack_SpotDetailScreen: {
     item: any;
   };
   AppStack_HotelSearch: undefined;
@@ -52,8 +56,13 @@ const AppStack: React.FC<Props> = ({navigation, route}) => {
         options={{headerShown: false}}
       />
       <Stack.Screen
-        name="AppStack_DetailScreen"
-        component={AppStack_DetailScreen}
+        name="AppStack_HotelDetailScreen"
+        component={AppStack_HotelDetailScreen}
+        options={{headerShown: false}}
+      />
+      <Stack.Screen
+        name="AppStack_SpotDetailScreen"
+        component={AppStack_SpotDetailScreen}
         options={{headerShown: false}}
       />
       <Stack.Screen
