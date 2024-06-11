@@ -51,6 +51,7 @@ const AuthStack_OTPScreen: React.FC<Props> = ({navigation, route}) => {
                 });
               }
               AsyncStorage.setItem('authStatus', 'true');
+              AsyncStorage.setItem('isLoggedIn', 'true');
               setUser(res.data.data);
               setLoading(false);
             })
